@@ -3,6 +3,7 @@
 ## ✅ Safe to Delete - Redundant/Unused Files
 
 ### 1. Old Layout System (Replaced by SimpleLayout)
+
 These files are **no longer used** since we simplified to `SimpleLayout.jsx`:
 
 ```bash
@@ -18,6 +19,7 @@ src/context/BiscuitContext.jsx  # ❌ Context now in SimpleLayout
 ---
 
 ### 2. Unused Components Folder
+
 ```bash
 components/                     # ❌ Empty folder
 ```
@@ -27,6 +29,7 @@ components/                     # ❌ Empty folder
 ---
 
 ### 3. Convex Database (Since using MongoDB now)
+
 ```bash
 convex/                         # ❌ Not using Convex, using MongoDB
 ```
@@ -36,6 +39,7 @@ convex/                         # ❌ Not using Convex, using MongoDB
 ---
 
 ### 4. Testing/Experimental Pages
+
 ```bash
 src/app/testSidebar/           # ❌ Test folder
 src/app/testingHome/           # ❌ Test folder
@@ -45,6 +49,7 @@ src/app/home/                  # ❌ Duplicate of page.jsx (home)
 ```
 
 **Why?** These were for testing during development. Your actual pages are:
+
 - `/login` - Real login page
 - `/dashboard` - Main dashboard
 - `/` (page.jsx) - Home page
@@ -52,6 +57,7 @@ src/app/home/                  # ❌ Duplicate of page.jsx (home)
 ---
 
 ### 5. Duplicate Config Files
+
 ```bash
 tailwind.config.js             # ❌ Keep tailwind.config.mjs instead
 ```
@@ -61,6 +67,7 @@ tailwind.config.js             # ❌ Keep tailwind.config.mjs instead
 ---
 
 ### 6. Random/Unused Files
+
 ```bash
 src/app/ideas.txt              # ❌ Random notes file
 src/app/data/                  # ❌ If it's mock data, can delete
@@ -72,6 +79,7 @@ src/app/data/                  # ❌ If it's mock data, can delete
 ## 📊 Summary of Deletions
 
 ### Files That Are Redundant:
+
 - **Old layout system**: 4 files (AppLayout, ClientRoot, providers, BiscuitContext)
 - **Empty folders**: 1 (components/)
 - **Convex database**: ~10+ files (entire convex/ folder)
@@ -132,17 +140,20 @@ echo "✅ Cleanup complete!"
 Check if these are actually used:
 
 ### Check #1: Components
+
 ```bash
 # See if MobileHeader, Header, Sidebar are imported anywhere
 grep -r "MobileHeader" src/app/ --exclude-dir=Components
 grep -r "Header" src/app/ --exclude-dir=Components
 ```
 
-**Action**: 
+**Action**:
+
 - If `MobileHeader` and `Header` aren't used → can delete
 - `Sidebar` might not be used since `SimpleLayout` has its own sidebar
 
 ### Check #2: Daily Tasks
+
 ```bash
 ls -la src/app/daily-tasks/
 ```
@@ -150,6 +161,7 @@ ls -la src/app/daily-tasks/
 **Action**: If it's just test HTML/CSS → can delete
 
 ### Check #3: Change Password/Username
+
 ```bash
 ls -la src/app/change-password/
 ls -la src/app/change-username/
@@ -162,6 +174,7 @@ ls -la src/app/change-username/
 ## 🎯 What to Keep
 
 ### Essential Files (DO NOT DELETE):
+
 ```
 ✅ src/app/SimpleLayout.jsx       # Your main layout
 ✅ src/app/layout.jsx             # Root layout
@@ -190,15 +203,18 @@ ls -la src/app/change-username/
 If you prefer to delete files manually (safer):
 
 ### Step 1: Delete Old Layout System
+
 1. Delete `src/app/AppLayout.jsx`
 2. Delete `src/app/ClientRoot.jsx`
 3. Delete `src/app/providers.jsx`
 4. Delete `src/context/` folder
 
 ### Step 2: Delete Convex
+
 1. Delete `convex/` folder (entire thing)
 
 ### Step 3: Delete Test Pages
+
 1. Delete `src/app/testSidebar/`
 2. Delete `src/app/testingHome/`
 3. Delete `src/app/simple-test/`
@@ -206,10 +222,12 @@ If you prefer to delete files manually (safer):
 5. Delete `src/app/home/`
 
 ### Step 4: Delete Duplicates
+
 1. Delete `tailwind.config.js` (keep `.mjs`)
 2. Delete `components/` empty folder
 
 ### Step 5: Clean Up
+
 1. Delete `src/app/ideas.txt`
 2. Delete `.DS_Store` files
 
@@ -237,6 +255,7 @@ Everything should still work! 🎉
 ## 📊 Before vs After
 
 ### Before Cleanup:
+
 ```
 Total Files: ~150+
 - Old layout system: 4 files
@@ -247,6 +266,7 @@ Total Files: ~150+
 ```
 
 ### After Cleanup:
+
 ```
 Total Files: ~120
 - Clean structure
@@ -281,6 +301,7 @@ Total Files: ~120
 ## 🎉 Ready to Clean?
 
 Choose your approach:
+
 - **Quick**: Run the automated script above
 - **Safe**: Follow step-by-step manual deletion
 - **Cautious**: Delete one file at a time and test

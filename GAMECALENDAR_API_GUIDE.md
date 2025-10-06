@@ -24,16 +24,16 @@ The GameCalendar component is **ready to use** with mock data now, and **ready t
 
 ```jsx
 // src/app/dashboard/page.jsx
-import GameCalendar from '../Components/GameCalendar';
+import GameCalendar from "../Components/GameCalendar";
 
 export default function Dashboard() {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold text-purple-900 mb-6">Dashboard</h1>
-      
+
       {/* Add GameCalendar here */}
       <GameCalendar />
-      
+
       {/* Rest of your dashboard */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Stats cards */}
@@ -50,6 +50,7 @@ export default function Dashboard() {
 ### Option 1: ESPN API (FREE, No Key Needed!)
 
 **Endpoint:**
+
 ```
 http://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/264/schedule
 ```
@@ -65,37 +66,38 @@ export default async function handler(req, res) {
   try {
     // Fetch from ESPN API
     const response = await fetch(
-      'http://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/264/schedule'
+      "http://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/264/schedule"
     );
-    
+
     const data = await response.json();
-    
+
     // Transform ESPN data to our format
     const games = data.events.map((event, index) => ({
       id: event.id,
       opponent: event.competitions[0].competitors.find(
-        team => team.team.displayName !== 'Washington Huskies'
+        (team) => team.team.displayName !== "Washington Huskies"
       ).team.displayName,
-      date: event.date.split('T')[0],
-      time: new Date(event.date).toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
+      date: event.date.split("T")[0],
+      time: new Date(event.date).toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
       }),
       location: event.competitions[0].venue.fullName,
-      isHome: event.competitions[0].competitors.find(
-        team => team.team.displayName === 'Washington Huskies'
-      ).homeAway === 'home',
+      isHome:
+        event.competitions[0].competitors.find(
+          (team) => team.team.displayName === "Washington Huskies"
+        ).homeAway === "home",
       week: event.week.number || index + 1,
       status: event.status.type.name, // 'STATUS_SCHEDULED', 'STATUS_IN_PROGRESS', 'STATUS_FINAL'
       homeScore: event.competitions[0].competitors[0].score,
       awayScore: event.competitions[0].competitors[1].score,
     }));
-    
+
     res.status(200).json(games);
   } catch (error) {
-    console.error('ESPN API Error:', error);
-    res.status(500).json({ error: 'Failed to fetch games' });
+    console.error("ESPN API Error:", error);
+    res.status(500).json({ error: "Failed to fetch games" });
   }
 }
 ```
@@ -104,9 +106,9 @@ export default async function handler(req, res) {
 
 ```jsx
 // src/app/Components/GameCalendar.jsx
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 const GameCalendar = () => {
   const [games, setGames] = useState([]);
@@ -119,17 +121,17 @@ const GameCalendar = () => {
     async function fetchGames() {
       try {
         setLoading(true);
-        const response = await fetch('/api/games/upcoming');
-        
+        const response = await fetch("/api/games/upcoming");
+
         if (!response.ok) {
-          throw new Error('Failed to fetch games');
+          throw new Error("Failed to fetch games");
         }
-        
+
         const data = await response.json();
         setGames(data);
         setError(null);
       } catch (err) {
-        console.error('Error fetching games:', err);
+        console.error("Error fetching games:", err);
         setError(err.message);
         // Fallback to mock data on error
         setGames(SAMPLE_GAMES);
@@ -137,7 +139,7 @@ const GameCalendar = () => {
         setLoading(false);
       }
     }
-    
+
     fetchGames();
   }, []);
 
@@ -175,6 +177,7 @@ const GameCalendar = () => {
 ## 💾 Phase 3: Store in MongoDB (Recommended)
 
 ### Why Store in MongoDB?
+
 - ✅ **Faster loading** - Don't hit ESPN API every time
 - ✅ **Rate limit protection** - Cache data locally
 - ✅ **Offline support** - Works even if ESPN is down
@@ -189,60 +192,63 @@ You already have `models/Game.js` ready to use! ✅
 Create: `pages/api/games/sync.js`
 
 ```javascript
-import connectDB from '../../../lib/mongodb';
-import Game from '../../../models/Game';
+import connectDB from "../../../lib/mongodb";
+import Game from "../../../models/Game";
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
     await connectDB();
-    
+
     // Fetch from ESPN
     const response = await fetch(
-      'http://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/264/schedule'
+      "http://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/264/schedule"
     );
     const data = await response.json();
-    
+
     // Save each game to MongoDB
     const savedGames = [];
     for (const event of data.events) {
       const gameData = {
         apiGameId: event.id,
-        sport: 'football',
-        homeTeam: 'Washington Huskies',
+        sport: "football",
+        homeTeam: "Washington Huskies",
         awayTeam: event.competitions[0].competitors.find(
-          team => team.team.displayName !== 'Washington Huskies'
+          (team) => team.team.displayName !== "Washington Huskies"
         ).team.displayName,
         gameDate: new Date(event.date),
         location: event.competitions[0].venue.fullName,
-        status: event.status.type.name === 'STATUS_FINAL' ? 'completed' 
-              : event.status.type.name === 'STATUS_IN_PROGRESS' ? 'live'
-              : 'scheduled',
+        status:
+          event.status.type.name === "STATUS_FINAL"
+            ? "completed"
+            : event.status.type.name === "STATUS_IN_PROGRESS"
+              ? "live"
+              : "scheduled",
         homeScore: event.competitions[0].competitors[0].score || 0,
         awayScore: event.competitions[0].competitors[1].score || 0,
         week: event.week.number,
       };
-      
+
       // Upsert (update if exists, create if not)
       const game = await Game.findOneAndUpdate(
         { apiGameId: event.id },
         gameData,
         { upsert: true, new: true }
       );
-      
+
       savedGames.push(game);
     }
-    
+
     res.status(200).json({
       success: true,
       message: `Synced ${savedGames.length} games`,
       games: savedGames,
     });
   } catch (error) {
-    console.error('Sync error:', error);
+    console.error("Sync error:", error);
     res.status(500).json({ error: error.message });
   }
 }
@@ -253,32 +259,32 @@ export default async function handler(req, res) {
 Update: `pages/api/games/upcoming.js`
 
 ```javascript
-import connectDB from '../../../lib/mongodb';
-import Game from '../../../models/Game';
+import connectDB from "../../../lib/mongodb";
+import Game from "../../../models/Game";
 
 export default async function handler(req, res) {
   try {
     await connectDB();
-    
+
     // Get upcoming and recent games
     const games = await Game.find({
       gameDate: {
         $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Past week
         $lte: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000), // Next 2 months
-      }
+      },
     })
-    .sort({ gameDate: 1 })
-    .limit(20);
-    
+      .sort({ gameDate: 1 })
+      .limit(20);
+
     // Transform to GameCalendar format
     const formattedGames = games.map((game, index) => ({
       id: game._id,
       opponent: game.awayTeam,
-      date: game.gameDate.toISOString().split('T')[0],
-      time: game.gameDate.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
+      date: game.gameDate.toISOString().split("T")[0],
+      time: game.gameDate.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
       }),
       location: game.location,
       isHome: true,
@@ -287,11 +293,11 @@ export default async function handler(req, res) {
       homeScore: game.homeScore,
       awayScore: game.awayScore,
     }));
-    
+
     res.status(200).json(formattedGames);
   } catch (error) {
-    console.error('Database error:', error);
-    res.status(500).json({ error: 'Failed to fetch games' });
+    console.error("Database error:", error);
+    res.status(500).json({ error: "Failed to fetch games" });
   }
 }
 ```
@@ -306,10 +312,12 @@ Add to `vercel.json`:
 
 ```json
 {
-  "crons": [{
-    "path": "/api/games/sync",
-    "schedule": "0 */6 * * *"
-  }]
+  "crons": [
+    {
+      "path": "/api/games/sync",
+      "schedule": "0 */6 * * *"
+    }
+  ]
 }
 ```
 
@@ -322,7 +330,7 @@ Add a button in your admin page:
 ```jsx
 <button
   onClick={async () => {
-    const res = await fetch('/api/games/sync', { method: 'POST' });
+    const res = await fetch("/api/games/sync", { method: "POST" });
     const data = await res.json();
     alert(data.message);
   }}
@@ -340,15 +348,17 @@ Add a button in your admin page:
 
 ```jsx
 // Show live indicator for ongoing games
-{game.status === 'live' && (
-  <span className="absolute top-2 right-2 flex items-center gap-1">
-    <span className="relative flex h-3 w-3">
-      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-      <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+{
+  game.status === "live" && (
+    <span className="absolute top-2 right-2 flex items-center gap-1">
+      <span className="relative flex h-3 w-3">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+        <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+      </span>
+      <span className="text-red-500 font-semibold text-sm">LIVE</span>
     </span>
-    <span className="text-red-500 font-semibold text-sm">LIVE</span>
-  </span>
-)}
+  );
+}
 ```
 
 ### Add Betting Integration
@@ -382,23 +392,27 @@ Add a button in your admin page:
 ## 📅 Implementation Timeline
 
 ### Week 1: Use Mock Data ✅
+
 - ✅ GameCalendar already built
 - ✅ Add to dashboard
 - ✅ Test with sample data
 
 ### Week 2-3: API Integration
+
 - [ ] Create ESPN API route
 - [ ] Update GameCalendar to fetch data
 - [ ] Add loading/error states
 - [ ] Test with real UW games
 
 ### Week 4: MongoDB Storage
+
 - [ ] Sync ESPN data to MongoDB
 - [ ] Update API to read from database
 - [ ] Set up auto-sync cron job
 - [ ] Add cache invalidation
 
 ### Week 5: Enhanced Features
+
 - [ ] Add live score updates
 - [ ] Integrate with betting system
 - [ ] Show betting odds

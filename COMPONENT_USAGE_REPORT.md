@@ -7,9 +7,11 @@ Generated: October 6, 2025
 ## ✅ USED Components (Keep These)
 
 ### 1. BiscuitIcon.jsx ✅
+
 **Status:** ✅ **ACTIVELY USED** - Keep this!
 
 **Used in:**
+
 - `src/app/Components/Sidebar.jsx` (1 import)
 - `src/app/leaderboard/page.jsx` (5 times)
 - `src/app/betting-history/loading.jsx` (1 import)
@@ -21,6 +23,7 @@ Generated: October 6, 2025
 ---
 
 ### 2. GameCalendar.jsx ⚠️
+
 **Status:** ⚠️ **DEFINED BUT NOT IMPORTED**
 
 **Imported By:** None found
@@ -28,6 +31,7 @@ Generated: October 6, 2025
 **Contains:** Full calendar component implementation
 
 **Verdict:** ⚠️ **PROBABLY DELETE** - Not imported anywhere
+
 - Could be for future use
 - If you're planning to use it, keep it
 - Otherwise, safe to delete
@@ -35,9 +39,11 @@ Generated: October 6, 2025
 ---
 
 ### 3. Sidebar.jsx ❓
+
 **Status:** ❓ **UNCLEAR** - Used by old system
 
 **Notes:**
+
 - `SimpleLayout.jsx` has its own sidebar built-in
 - This `Sidebar.jsx` was part of the old complex layout
 - Not directly imported in your current pages
@@ -49,6 +55,7 @@ Generated: October 6, 2025
 ## ❌ UNUSED Components (Safe to Delete)
 
 ### 1. MobileHeader.jsx ❌
+
 **Status:** ❌ **NOT USED ANYWHERE**
 
 **Imported By:** No imports found
@@ -58,6 +65,7 @@ Generated: October 6, 2025
 ---
 
 ### 2. Header.jsx ❌
+
 **Status:** ❌ **NOT USED ANYWHERE**
 
 **Imported By:** No imports found
@@ -67,6 +75,7 @@ Generated: October 6, 2025
 ---
 
 ### 3. BiscuitCard.jsx ❌
+
 **Status:** ❌ **NOT USED ANYWHERE**
 
 **Imported By:** No imports found
@@ -76,9 +85,11 @@ Generated: October 6, 2025
 ---
 
 ### 4. SettingsSidebar/ ❌
+
 **Status:** ❌ **NOT USED ANYWHERE**
 
 **Folder contains:**
+
 - `SettingsSidebar.jsx`
 - `SettingsSidebar.module.css`
 
@@ -90,21 +101,22 @@ Generated: October 6, 2025
 
 ## 📊 Summary
 
-| Component | Status | Action |
-|-----------|--------|--------|
-| BiscuitIcon.jsx | ✅ Used (7 places) | ✅ **KEEP** |
-| GameCalendar.jsx | ⚠️ Defined but not imported | ⚠️ **DELETE (unless planning to use)** |
-| Sidebar.jsx | ❓ Part of old system | ❌ **DELETE (replaced by SimpleLayout)** |
-| MobileHeader.jsx | ❌ Not used | ❌ **DELETE** |
-| Header.jsx | ❌ Not used | ❌ **DELETE** |
-| BiscuitCard.jsx | ❌ Not used | ❌ **DELETE** |
-| SettingsSidebar/ | ❌ Not used | ❌ **DELETE FOLDER** |
+| Component        | Status                      | Action                                   |
+| ---------------- | --------------------------- | ---------------------------------------- |
+| BiscuitIcon.jsx  | ✅ Used (7 places)          | ✅ **KEEP**                              |
+| GameCalendar.jsx | ⚠️ Defined but not imported | ⚠️ **DELETE (unless planning to use)**   |
+| Sidebar.jsx      | ❓ Part of old system       | ❌ **DELETE (replaced by SimpleLayout)** |
+| MobileHeader.jsx | ❌ Not used                 | ❌ **DELETE**                            |
+| Header.jsx       | ❌ Not used                 | ❌ **DELETE**                            |
+| BiscuitCard.jsx  | ❌ Not used                 | ❌ **DELETE**                            |
+| SettingsSidebar/ | ❌ Not used                 | ❌ **DELETE FOLDER**                     |
 
 ---
 
 ## 🗑️ Recommended Deletions
 
 ### Safe to Delete Right Now:
+
 ```bash
 rm src/app/Components/MobileHeader.jsx
 rm src/app/Components/Header.jsx
@@ -114,6 +126,7 @@ rm -rf src/app/Components/SettingsSidebar/
 ```
 
 ### Consider Deleting (if not planning to use):
+
 ```bash
 rm src/app/Components/GameCalendar.jsx
 ```
@@ -123,6 +136,7 @@ rm src/app/Components/GameCalendar.jsx
 ## ✅ Components to KEEP
 
 Only **1 component** is actively used:
+
 ```
 ✅ src/app/Components/BiscuitIcon.jsx
 ```
@@ -145,12 +159,14 @@ Super clean! 🎉
 ## 🧪 How to Verify Before Deleting
 
 ### Method 1: Search in VS Code
+
 1. Open VS Code
 2. Press `Cmd+Shift+F` (Mac) or `Ctrl+Shift+F` (Windows)
 3. Search for: `MobileHeader`
 4. If no results → Safe to delete
 
 ### Method 2: Use grep (command line)
+
 ```bash
 # Check if MobileHeader is used
 grep -r "MobileHeader" src/app/ --exclude-dir=Components
@@ -163,6 +179,7 @@ grep -r "import.*Sidebar" src/app/ --exclude-dir=Components
 ```
 
 ### Method 3: Try deleting and test
+
 ```bash
 # Delete one file
 rm src/app/Components/MobileHeader.jsx
@@ -212,6 +229,7 @@ src/app/Components/
 ## 💡 Why This Happens
 
 These unused components were probably created during development:
+
 - **MobileHeader/Header** → Replaced by SimpleLayout's built-in header
 - **Sidebar** → Replaced by SimpleLayout's built-in sidebar
 - **BiscuitCard** → Created but never implemented
@@ -223,6 +241,7 @@ These unused components were probably created during development:
 ## ✅ Verification Complete!
 
 **Results:**
+
 - ✅ 1 component actively used (BiscuitIcon)
 - ❌ 5-6 components completely unused
 - 🎯 Can safely delete **5-6 files/folders**

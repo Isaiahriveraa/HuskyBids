@@ -9,24 +9,29 @@ I checked **every** potentially unused file. Here's what you need to delete:
 ## 🔴 DELETE THESE FILES (100% Confirmed Unused)
 
 ### 1. Old Layout System Files (3 files)
+
 ```bash
 rm src/app/AppLayout.jsx
-rm src/app/ClientRoot.jsx  
+rm src/app/ClientRoot.jsx
 rm src/app/providers.jsx
 ```
+
 **Status:** ❌ **0 imports found** - Not used anywhere
 
 ---
 
 ### 2. Old Context System (1 folder)
+
 ```bash
 rm -rf src/context
 ```
+
 **Status:** ❌ **Not used** - Replaced by SimpleLayout
 
 ---
 
 ### 3. Unused Components (6 items)
+
 ```bash
 rm src/app/Components/MobileHeader.jsx
 rm src/app/Components/Header.jsx
@@ -35,23 +40,28 @@ rm src/app/Components/BiscuitCard.jsx
 rm src/app/Components/GameCalendar.jsx
 rm -rf src/app/Components/SettingsSidebar/
 ```
+
 **Status:** ❌ **0 imports found** - Not used anywhere
 
 ---
 
 ### 4. Duplicate Config File (1 file)
+
 ```bash
 rm tailwind.config.js
 ```
+
 **Status:** ❌ Keep `tailwind.config.mjs` instead
 
 ---
 
 ### 5. Misc Files (1+ files)
+
 ```bash
 rm src/app/ideas.txt
 find . -name ".DS_Store" -delete
 ```
+
 **Status:** ❌ Random notes and system files
 
 ---
@@ -65,14 +75,14 @@ find . -name ".DS_Store" -delete
 
 ## 📊 Total Files to Delete
 
-| Category | Files | Status |
-|----------|-------|--------|
-| Old Layout System | 3 files | ❌ Delete |
-| Context Folder | 1 folder | ❌ Delete |
-| Unused Components | 6 items | ❌ Delete |
-| Duplicate Config | 1 file | ❌ Delete |
-| Misc Files | 2+ files | ❌ Delete |
-| **TOTAL** | **13+ items** | **Ready to delete** |
+| Category          | Files         | Status              |
+| ----------------- | ------------- | ------------------- |
+| Old Layout System | 3 files       | ❌ Delete           |
+| Context Folder    | 1 folder      | ❌ Delete           |
+| Unused Components | 6 items       | ❌ Delete           |
+| Duplicate Config  | 1 file        | ❌ Delete           |
+| Misc Files        | 2+ files      | ❌ Delete           |
+| **TOTAL**         | **13+ items** | **Ready to delete** |
 
 ---
 
@@ -103,13 +113,16 @@ echo "✅ Cleanup complete! Deleted 13+ unused files"
 ## ⚠️ KEEP THESE (Actually Used!)
 
 ### ✅ Components to Keep
+
 - ✅ `src/app/Components/BiscuitIcon.jsx` - **Used in 3 files**
 
 ### ✅ Layout to Keep
+
 - ✅ `src/app/SimpleLayout.jsx` - **Your main layout**
 - ✅ `src/app/layout.jsx` - **Root layout**
 
 ### ✅ Pages to Keep
+
 - ✅ All your page folders (dashboard, leaderboard, etc.)
 
 ---
@@ -186,6 +199,7 @@ src/app/
 **Want me to delete everything for you?** Just say yes and I'll run the cleanup command!
 
 Or run it yourself:
+
 ```bash
 ./cleanup.sh
 ```

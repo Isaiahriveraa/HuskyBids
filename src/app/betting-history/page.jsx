@@ -1,52 +1,129 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+
+// Cache object to store betting history
+const bettingCache = {
+  data: null,
+  timestamp: null,
+  CACHE_DURATION: 5 * 60 * 1000, // 5 minutes in milliseconds
+  
+  set(data) {
+    this.data = data;
+    this.timestamp = Date.now();
+    // Also store in localStorage for persistence across page reloads
+    try {
+      localStorage.setItem('bettingHistory', JSON.stringify({
+        data,
+        timestamp: this.timestamp
+      }));
+    } catch (error) {
+      console.warn('Could not save to localStorage:', error);
+    }
+  },
+  
+  get() {
+    // Check memory cache first
+    if (this.data && this.isValid()) {
+      return this.data;
+    }
+    
+    // Check localStorage cache
+    try {
+      const stored = localStorage.getItem('bettingHistory');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Date.now() - parsed.timestamp < this.CACHE_DURATION) {
+          this.data = parsed.data;
+          this.timestamp = parsed.timestamp;
+          return this.data;
+        }
+      }
+    } catch (error) {
+      console.warn('Could not read from localStorage:', error);
+    }
+    
+    return null;
+  },
+  
+  isValid() {
+    return this.timestamp && (Date.now() - this.timestamp) < this.CACHE_DURATION;
+  },
+  
+  clear() {
+    this.data = null;
+    this.timestamp = null;
+    try {
+      localStorage.removeItem('bettingHistory');
+    } catch (error) {
+      console.warn('Could not clear localStorage:', error);
+    }
+  }
+};
 
 const BettingHistory = () => {
   const [bets, setBets] = useState([]);
-  const [filteredBets, setFilteredBets] = useState([]);
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [cacheStatus, setCacheStatus] = useState(''); // For showing cache info to user
   
-  // Fetch data with error handling
-  useEffect(() => {
-    const fetchBets = async () => {
-      setLoading(true);
-      try {
-        // In a real implementation, replace this with your API call
-        // const response = await fetch('/api/betting-history');
-        // const data = await response.json();
-        
-        // Using mock data for now
-        const mockBets = [
-          { id: 1, eventName: 'UW vs Oregon Football', betAmount: 50, potentialWin: 150, date: '2023-10-15', status: 'won' },
-          { id: 2, eventName: 'UW Basketball Tournament', betAmount: 30, potentialWin: 90, date: '2023-09-28', status: 'lost' },
-          { id: 3, eventName: 'Husky Spring Game', betAmount: 25, potentialWin: 75, date: '2023-11-05', status: 'pending' },
-          { id: 4, eventName: 'UW vs WSU Football', betAmount: 100, potentialWin: 250, date: '2023-11-25', status: 'won' },
-          { id: 5, eventName: 'PAC-12 Championships', betAmount: 75, potentialWin: 225, date: '2023-12-02', status: 'pending' },
-        ];
-        
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        setBets(mockBets);
-        setFilteredBets(mockBets);
-        setError(null);
-      } catch (err) {
-        console.error("Error fetching betting history:", err);
-        setError("Failed to load betting history. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Fetch data function (stable reference)
+  const fetchBets = async () => {
+    // Try to get from cache first
+    const cachedData = bettingCache.get();
     
-    fetchBets();
-  }, []);
+    if (cachedData) {
+      setBets(cachedData);
+      setLoading(false);
+      setCacheStatus('Loaded from cache ⚡');
+      console.log('✅ Betting history loaded from cache');
+      return;
+    }
+    
+    // If no cache, fetch from "API"
+    setLoading(true);
+    setCacheStatus('Loading fresh data...');
+    
+    try {
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const mockBets = [
+        { id: 1, eventName: 'UW vs Oregon Football', betAmount: 50, potentialWin: 150, date: '2023-10-15', status: 'won' },
+        { id: 2, eventName: 'UW Basketball Tournament', betAmount: 30, potentialWin: 90, date: '2023-09-28', status: 'lost' },
+        { id: 3, eventName: 'Husky Spring Game', betAmount: 25, potentialWin: 75, date: '2023-11-05', status: 'pending' },
+        { id: 4, eventName: 'UW vs WSU Football', betAmount: 100, potentialWin: 250, date: '2023-11-25', status: 'won' },
+        { id: 5, eventName: 'PAC-12 Championships', betAmount: 75, potentialWin: 225, date: '2023-12-02', status: 'pending' },
+        { id: 6, eventName: 'UW vs UCLA Basketball', betAmount: 40, potentialWin: 120, date: '2023-12-10', status: 'won' },
+        { id: 7, eventName: 'Rose Bowl Prediction', betAmount: 200, potentialWin: 600, date: '2024-01-01', status: 'lost' },
+      ];
+      
+      // Cache the fresh data
+      bettingCache.set(mockBets);
+      
+      setBets(mockBets);
+      setError(null);
+      setCacheStatus('Fresh data loaded 🔄');
+      console.log('✅ Fresh betting history loaded and cached');
+      
+    } catch (err) {
+      console.error("Error fetching betting history:", err);
+      setError("Failed to load betting history. Please try again later.");
+      setCacheStatus('Error loading data ❌');
+    } finally {
+      setLoading(false);
+    }
+  };
   
-  // Handle filtering
+  // Fetch data on component mount only
   useEffect(() => {
+    fetchBets();
+  }, []); // Empty dependency array - only run once on mount
+  
+  // Memoized filtered results for better performance
+  const filteredBets = useMemo(() => {
     let result = [...bets];
     
     // Apply status filter
@@ -61,8 +138,42 @@ const BettingHistory = () => {
       );
     }
     
-    setFilteredBets(result);
-  }, [filter, searchQuery, bets]);
+    return result;
+  }, [bets, filter, searchQuery]);
+  
+  // Function to manually refresh data
+  const refreshData = async () => {
+    bettingCache.clear();
+    setLoading(true);
+    setCacheStatus('Refreshing...');
+    
+    try {
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const mockBets = [
+        { id: 1, eventName: 'UW vs Oregon Football', betAmount: 50, potentialWin: 150, date: '2023-10-15', status: 'won' },
+        { id: 2, eventName: 'UW Basketball Tournament', betAmount: 30, potentialWin: 90, date: '2023-09-28', status: 'lost' },
+        { id: 3, eventName: 'Husky Spring Game', betAmount: 25, potentialWin: 75, date: '2023-11-05', status: 'pending' },
+        { id: 4, eventName: 'UW vs WSU Football', betAmount: 100, potentialWin: 250, date: '2023-11-25', status: 'won' },
+        { id: 5, eventName: 'PAC-12 Championships', betAmount: 75, potentialWin: 225, date: '2023-12-02', status: 'pending' },
+        { id: 6, eventName: 'UW vs UCLA Basketball', betAmount: 40, potentialWin: 120, date: '2023-12-10', status: 'won' },
+        { id: 7, eventName: 'Rose Bowl Prediction', betAmount: 200, potentialWin: 600, date: '2024-01-01', status: 'lost' },
+      ];
+      
+      bettingCache.set(mockBets);
+      setBets(mockBets);
+      setError(null);
+      setCacheStatus('Data refreshed! 🔄');
+      
+    } catch (err) {
+      console.error("Error refreshing betting history:", err);
+      setError("Failed to refresh betting history. Please try again later.");
+      setCacheStatus('Refresh failed ❌');
+    } finally {
+      setLoading(false);
+    }
+  };
   
   // Function to get the color for status chip
   const getStatusColor = (status) => {
@@ -76,12 +187,30 @@ const BettingHistory = () => {
   
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <h1 className="text-3xl font-bold text-purple-900 mb-6">Betting History</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-purple-900">Betting History</h1>
+        
+        {/* Cache status and refresh button */}
+        <div className="flex items-center gap-4">
+          {cacheStatus && (
+            <div className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
+              {cacheStatus}
+            </div>
+          )}
+          <button
+            onClick={refreshData}
+            disabled={loading}
+            className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {loading ? '⟳' : '🔄'} Refresh
+          </button>
+        </div>
+      </div>
       
       <div className="flex flex-wrap items-center gap-4 mb-6">
         <div className="relative flex-grow min-w-[200px]">
           <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-            <span className="material-icons text-gray-400">search</span>
+            🔍
           </span>
           <input
             type="text"
@@ -105,12 +234,17 @@ const BettingHistory = () => {
               <option value="pending">Pending</option>
             </select>
             <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <span className="material-icons text-gray-400">filter_list</span>
+              📋
             </span>
             <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-              <span className="material-icons text-gray-400">arrow_drop_down</span>
+              ▼
             </span>
           </div>
+        </div>
+        
+        {/* Results counter */}
+        <div className="text-sm text-gray-600">
+          {loading ? 'Loading...' : `${filteredBets.length} result${filteredBets.length !== 1 ? 's' : ''}`}
         </div>
       </div>
       
@@ -153,7 +287,7 @@ const BettingHistory = () => {
                 ) : (
                   <tr>
                     <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
-                      No betting history found.
+                      {loading ? 'Loading betting history...' : 'No betting history found.'}
                     </td>
                   </tr>
                 )}
@@ -163,8 +297,13 @@ const BettingHistory = () => {
         </div>
       )}
       
-      <div className="mt-6 text-sm text-gray-500">
-        This page shows your betting history. You can filter by bet status or search for specific events.
+      <div className="mt-6 flex justify-between items-center text-sm text-gray-500">
+        <div>
+          This page shows your betting history with intelligent caching for faster loading.
+        </div>
+        <div className="text-right">
+          Cache expires in 5 minutes • Data refreshes automatically
+        </div>
       </div>
     </div>
   );

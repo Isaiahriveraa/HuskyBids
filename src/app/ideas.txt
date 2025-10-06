@@ -1,5 +1,0 @@
-1) When we click a button is matched with the color in the background, modfiying the button we click it makes it the same color as the background
-2) Get rid of the left side bar
-3) fix profile staying there.
-4) make the right side bar pop out when we click the profile
- 

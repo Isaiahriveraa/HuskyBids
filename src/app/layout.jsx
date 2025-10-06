@@ -1,24 +1,19 @@
-import "./globals.css";
-import Sidebar from "./Components/Sidebar";
-import { ClerkProvider } from "@clerk/nextjs";
+import './globals.css';
+import SimpleLayout from './SimpleLayout';
+
+export const metadata = {
+  title: "HuskyBids",
+  description: "Bet on University of Washington sports games using biscuits!",
+};
 
 export default function RootLayout({ children }) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <head>
-          <link
-            href="https://fonts.googleapis.com/icon?family=Material+Icons"
-            rel="stylesheet"
-          />
-        </head>
-        <body>
-          <div className="flex min-h-screen bg-gray-50">
-            <Sidebar />
-            <main className="flex-1 ml-64">{children}</main>
-          </div>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en">
+      <body>
+        <SimpleLayout>
+          {children}
+        </SimpleLayout>
+      </body>
+    </html>
   );
 }

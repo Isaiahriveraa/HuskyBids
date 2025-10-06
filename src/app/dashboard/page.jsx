@@ -1,45 +1,48 @@
-'use client';
-
-import Image from 'next/image';
 import GameCalendar from '../Components/GameCalendar';
 
 export default function Dashboard() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto py-8 px-4">
-        {/* Header with Logo */}
-        <div className="flex justify-center mb-12">
-          <Image
-            src="/images/logo.png"
-            alt="HuskyBids Logo"
-            width={300}
-            height={100}
-            priority
-            className="mb-8"
-          />
+    <div className="p-6">
+      <h1 className="text-3xl font-bold text-purple-900 mb-6">Dashboard</h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Stats Cards */}
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-lg font-semibold text-gray-800">Total Bets</h2>
+          <p className="text-3xl font-bold text-purple-600">24</p>
         </div>
-
-        {/* Game Calendar Section */}
-        <div className="mb-12">
-          <GameCalendar />
+        
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-lg font-semibold text-gray-800">Win Rate</h2>
+          <p className="text-3xl font-bold text-green-600">68%</p>
         </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-lg font-semibold text-gray-800">Rank</h2>
+          <p className="text-3xl font-bold text-yellow-600">#12</p>
+        </div>
+      </div>
 
-        {/* Recent Activity Section */}
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold text-purple-900 mb-4">Recent Activity</h2>
-            <p className="text-gray-600">Activity feed coming soon...</p>
+      {/* Recent Activity */}
+      <div className="mt-8 bg-white p-6 rounded-lg shadow">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Recent Activity</h2>
+        <div className="space-y-3">
+          <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
+            <span>UW vs Oregon - Football</span>
+            <span className="text-green-600 font-semibold">Won 50 biscuits</span>
+          </div>
+          <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
+            <span>UW vs Stanford - Basketball</span>
+            <span className="text-red-600 font-semibold">Lost 30 biscuits</span>
           </div>
         </div>
+      </div>
 
-        {/* Welcome Message */}
-        <div className="mt-12 bg-purple-100 rounded-lg p-6 text-center max-w-2xl mx-auto">
-          <h2 className="text-2xl font-bold text-purple-900 mb-4">Welcome to HuskyBids!</h2>
-          <p className="text-purple-800">
-            Place your bets on UW football games, earn Biscuits, and climb the leaderboard.
-          </p>
-        </div>
+      {/* Game Calendar */}
+      <div className="mt-8 bg-white p-6 rounded-lg shadow">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Game Calendar</h2>
+        <GameCalendar />
       </div>
     </div>
   );
-} 
+}

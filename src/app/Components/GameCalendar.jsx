@@ -1,8 +1,24 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
+/**
+ * GameCalendar Component
+ * 
+ * TODO: API Integration Steps
+ * 1. Replace SAMPLE_GAMES with data from ESPN API or CollegeFootballData API
+ * 2. Add useEffect to fetch games on component mount
+ * 3. Add loading state while fetching
+ * 4. Add error handling for failed API calls
+ * 5. Connect to MongoDB to store/cache game data
+ * 
+ * ESPN API Endpoint:
+ * http://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/264/schedule
+ * (Team ID 264 = Washington Huskies)
+ */
 
 // Sample game data - Mock Data for Demo
+// TODO: Replace this with API fetch from /api/games/upcoming
 const SAMPLE_GAMES = [
     {
         id: 1,
@@ -115,13 +131,27 @@ const SAMPLE_GAMES = [
     
 ];
 
-const GameCalendar = () => {
+const GameCalendar = ({ games = SAMPLE_GAMES, isLoading = false }) => {
     const [currentWeek, setCurrentWeek] = useState(1);
     const [selectedGame, setSelectedGame] = useState(null);
 
+    // TODO: Uncomment when API is ready
+    // useEffect(() => {
+    //   async function fetchGames() {
+    //     try {
+    //       const response = await fetch('/api/games/upcoming');
+    //       const data = await response.json();
+    //       setGames(data);
+    //     } catch (error) {
+    //       console.error('Failed to fetch games:', error);
+    //     }
+    //   }
+    //   fetchGames();
+    // }, []);
+
     // Get games for current week
     const getGamesForWeek = (week) => {
-        return SAMPLE_GAMES.filter(game => game.week === week);
+        return games.filter(game => game.week === week);
     };
 
     // Function to handle week navigation

@@ -2,11 +2,15 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+
 import BiscuitIcon from "./BiscuitIcon";
 import { usePathname } from 'next/navigation';
+import { useUser } from "@clerk/nextjs";
+// import { useMutation, useQuery } from "convex/react";
+// import { api } from "@/convex/_generated/api";
 
-const Sidebar = ({ biscuits = 1000 }) => {
+
+const Sidebar = ({ biscuits = 1000, mobileMenuOpen, setMobileMenuOpen }) => {
   // Default starting balance of 1000 biscuits
   const [showDailyBonus, setShowDailyBonus] = useState(true);
 
@@ -43,7 +47,21 @@ const Sidebar = ({ biscuits = 1000 }) => {
   };
 
   return (
-    <div className="fixed left-0 top-0 h-full w-64 bg-yellow-400 text-purple-900 p-6 flex flex-col shadow-lg">
+    <div className={`fixed left-0 top-0 h-full w-64 bg-yellow-400 text-purple-900 p-6 flex flex-col shadow-lg z-50 transform transition-transform duration-300 ${
+      mobileMenuOpen ? 'translate-x-0' : 'md:translate-x-0 -translate-x-full'
+    }`}>
+      {/* Close button for mobile */}
+      <div className="md:hidden flex justify-end mb-4">
+        <button 
+          onClick={() => setMobileMenuOpen && setMobileMenuOpen(false)}
+          className="text-purple-900 hover:text-purple-700"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
       {/* Logo/Header */}
       <div className="mb-8">
         <Link href="/" className="block">

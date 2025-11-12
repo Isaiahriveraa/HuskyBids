@@ -12,6 +12,41 @@
 
 # testing
 /coverage
+test-mongodb.js
+
+# development documentation / working notes
+# Note: CLAUDE.md should be committed as it contains project instructions
+BISCUIT_UPDATE_FIX.md
+DASHBOARD_IMPLEMENTATION.md
+PROJECT_TASKS.md
+REFACTORING_TASKS.md
+
+# All uppercase markdown files (planning/diagnostic docs)
+# Excludes CLAUDE.md and README.md which should be committed
+[!CR]*[A-Z]_*.md
+CODE_QUALITY_AUDIT.md
+DARK_MODE_*.md
+MONGOOSE_*.md
+PAST_GAMES_*.md
+PHASE*.md
+UI_UX_*.md
+CLAUDE.md
+
+# Phase and planning docs
+phase*.md
+
+# Development docs directory
+docs/
+
+# Development scripts
+*.sh
+scripts/
+validate-setup.sh
+check-usage.sh
+cleanup.sh
+
+# Development resources
+resources/
 
 # next.js
 /.next/

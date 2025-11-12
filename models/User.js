@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { calculateWinRate, calculateROI } from '../lib/utils/stats-utils.js';
 
 const UserSchema = new mongoose.Schema(
   {
@@ -43,6 +44,12 @@ const UserSchema = new mongoose.Schema(
       type: Number,
       default: 0,
       min: 0,
+      validate: {
+        validator: function() {
+          return this.totalBets >= (this.winningBets + this.losingBets);
+        },
+        message: 'totalBets must be >= winningBets + losingBets'
+      }
     },
     winningBets: {
       type: Number,
@@ -70,6 +77,19 @@ const UserSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
+    lastDailyRewardClaimed: {
+      type: Date,
+      default: null,
+    },
+    dailyTasksCompleted: {
+      type: Map,
+      of: Boolean,
+      default: {},
+    },
+    lastDailyTaskReset: {
+      type: Date,
+      default: null,
+    },
     totalBiscuitsWon: {
       type: Number,
       default: 0,
@@ -78,7 +98,12 @@ const UserSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    
+    totalBiscuitsWagered: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
     // Account status
     isActive: {
       type: Boolean,
@@ -94,18 +119,22 @@ const UserSchema = new mongoose.Schema(
   }
 );
 
+// Compound index for leaderboard queries (optimizes sorting by biscuits with filtering)
+UserSchema.index({ isActive: 1, isBanned: 1, biscuits: -1 });
+
 // Virtual field for win rate
 UserSchema.virtual('winRate').get(function () {
-  if (this.totalBets === 0) return 0;
-  return Math.round((this.winningBets / this.totalBets) * 100);
+  return calculateWinRate(this.winningBets, this.totalBets, 1);
 });
 
 // Virtual field for ROI (Return on Investment)
 UserSchema.virtual('roi').get(function () {
-  const invested = this.totalBiscuitsWon + this.totalBiscuitsLost;
-  if (invested === 0) return 0;
-  const profit = this.totalBiscuitsWon - this.totalBiscuitsLost;
-  return Math.round((profit / invested) * 100);
+  return calculateROI(
+    this.totalBiscuitsWon,
+    this.totalBiscuitsLost,
+    this.totalBiscuitsWagered,
+    2
+  );
 });
 
 // Instance method to add biscuits

@@ -81,9 +81,11 @@ const BetSchema = new mongoose.Schema(
   }
 );
 
-// Compound index for user's betting history
+// Compound indexes for optimized queries
 BetSchema.index({ userId: 1, placedAt: -1 });
 BetSchema.index({ gameId: 1, status: 1 });
+// Optimizes user history queries with status filtering
+BetSchema.index({ clerkId: 1, status: 1, placedAt: -1 });
 
 // Virtual field for profit/loss
 BetSchema.virtual('profitLoss').get(function () {
@@ -173,7 +175,7 @@ BetSchema.statics.getUserPendingBets = function (userId) {
 // Static method to calculate total wagered on a game
 BetSchema.statics.getTotalWagered = async function (gameId) {
   const result = await this.aggregate([
-    { $match: { gameId: mongoose.Types.ObjectId(gameId), status: 'pending' } },
+    { $match: { gameId: new mongoose.Types.ObjectId(gameId), status: 'pending' } },
     {
       $group: {
         _id: null,

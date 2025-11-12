@@ -28,6 +28,10 @@ const GameSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    opponent: {
+      type: String,
+      default: null,
+    },
     
     // Game info
     gameDate: {
@@ -126,11 +130,59 @@ const GameSchema = new mongoose.Schema(
       type: Number,
       default: null,
     },
+
+    // Team Logos (from ESPN)
+    uwLogo: {
+      type: String,
+      default: 'https://a.espncdn.com/i/teamlogos/ncaa/500/264.png',
+    },
+    opponentLogo: {
+      type: String,
+      default: null,
+    },
+    homeTeamLogo: {
+      type: String,
+      default: null,
+    },
+    awayTeamLogo: {
+      type: String,
+      default: null,
+    },
+
+    // Top Players (from ESPN leaders)
+    uwTopPlayer: {
+      name: { type: String, default: null },
+      stats: { type: String, default: null },
+      position: { type: String, default: null },
+      athleteId: { type: String, default: null },
+    },
+    opponentTopPlayer: {
+      name: { type: String, default: null },
+      stats: { type: String, default: null },
+      position: { type: String, default: null },
+      athleteId: { type: String, default: null },
+    },
+
+    // ESPN Odds Data (different from our betting odds)
+    espnOdds: {
+      provider: { type: String, default: null },
+      details: { type: String, default: null },
+      overUnder: { type: Number, default: null },
+      spread: { type: Number, default: null },
+      homeMoneyLine: { type: Number, default: null },
+      awayMoneyLine: { type: Number, default: null },
+    },
   },
   {
     timestamps: true,
   }
 );
+
+// Compound indexes for common query patterns
+// Optimizes queries filtering by status and sorting by date
+GameSchema.index({ status: 1, gameDate: 1 });
+// Optimizes queries filtering by sport, status, and sorting by date
+GameSchema.index({ sport: 1, status: 1, gameDate: 1 });
 
 // Virtual field for game display name
 GameSchema.virtual('displayName').get(function () {
@@ -150,32 +202,12 @@ GameSchema.virtual('canBet').get(function () {
   );
 });
 
-// Instance method to update odds based on betting distribution
-GameSchema.methods.updateOdds = async function () {
-  const totalBets = this.homeBets + this.awayBets;
-  
-  if (totalBets === 0) {
-    this.homeOdds = 2.0;
-    this.awayOdds = 2.0;
-    return this;
-  }
-  
-  // Calculate odds based on betting percentage
-  const homePercentage = this.homeBets / totalBets;
-  const awayPercentage = this.awayBets / totalBets;
-  
-  // Simple odds calculation (inverse of betting percentage)
-  // More popular bet = lower odds
-  this.homeOdds = Math.max(1.1, Math.min(10.0, 1 / homePercentage));
-  this.awayOdds = Math.max(1.1, Math.min(10.0, 1 / awayPercentage));
-  
-  // Round to 2 decimal places
-  this.homeOdds = Math.round(this.homeOdds * 100) / 100;
-  this.awayOdds = Math.round(this.awayOdds * 100) / 100;
-  
-  await this.save();
-  return this;
-};
+// NOTE: Odds calculation has been centralized in /lib/odds-calculator.js
+// All odds calculations should use calculateOdds() from that module, which:
+// - Uses weighted algorithm (70% biscuits wagered, 30% bet count)
+// - Applies 5% house edge
+// - Clamps odds between 1.1x and 10.0x
+// This ensures consistent odds calculation across the entire application
 
 // Instance method to close betting
 GameSchema.methods.closeBetting = async function () {

@@ -197,32 +197,50 @@ export default function CardStyleC({ game, onClick }) {
           </div>
 
           {/* Top Performers - Compact (Only for completed games) */}
-          {isCompleted && (game.uwTopPlayer || game.opponentTopPlayer) && (
+          {isCompleted && (
             <div className="border-t-2 border-gray-200 pt-3 mb-3">
               <div className="flex items-center justify-center gap-1.5 mb-2">
                 <Trophy className="w-4 h-4 text-yellow-500" />
                 <span className="font-black text-xs text-gray-700 uppercase tracking-wider">Top Performers</span>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                {/* UW Top Player */}
-                {game.uwTopPlayer && (
-                  <div className="bg-gradient-to-br from-uw-purple-100 to-uw-purple-50 rounded-lg p-2">
-                    <div className="font-bold text-uw-purple-900 text-xs">{game.uwTopPlayer.name}</div>
-                    <div className="text-xs text-uw-purple-600 font-semibold">{game.uwTopPlayer.position}</div>
-                    <div className="text-xs font-black text-uw-purple-900 mt-0.5">{game.uwTopPlayer.stats}</div>
-                  </div>
-                )}
+              {(game.uwTopPlayer || game.opponentTopPlayer) ? (
+                <div className="grid grid-cols-2 gap-2">
+                  {/* UW Top Player */}
+                  {game.uwTopPlayer ? (
+                    <div className="bg-gradient-to-br from-uw-purple-100 to-uw-purple-50 rounded-lg p-2">
+                      <div className="font-bold text-uw-purple-900 text-xs">{game.uwTopPlayer.name}</div>
+                      <div className="text-xs text-uw-purple-600 font-semibold">{game.uwTopPlayer.position}</div>
+                      <div className="text-xs font-black text-uw-purple-900 mt-0.5">{game.uwTopPlayer.stats}</div>
+                    </div>
+                  ) : (
+                    <div className="bg-gradient-to-br from-uw-purple-100 to-uw-purple-50 rounded-lg p-2 opacity-50">
+                      <div className="font-bold text-uw-purple-900 text-xs">No Data</div>
+                      <div className="text-xs text-uw-purple-600 font-semibold">-</div>
+                      <div className="text-xs font-black text-uw-purple-900 mt-0.5">-</div>
+                    </div>
+                  )}
 
-                {/* Opponent Top Player */}
-                {game.opponentTopPlayer && (
-                  <div className="bg-gradient-to-br from-gray-100 to-gray-50 rounded-lg p-2">
-                    <div className="font-bold text-gray-900 text-xs">{game.opponentTopPlayer.name}</div>
-                    <div className="text-xs text-gray-600 font-semibold">{game.opponentTopPlayer.position}</div>
-                    <div className="text-xs font-black text-gray-900 mt-0.5">{game.opponentTopPlayer.stats}</div>
-                  </div>
-                )}
-              </div>
+                  {/* Opponent Top Player */}
+                  {game.opponentTopPlayer ? (
+                    <div className="bg-gradient-to-br from-gray-100 to-gray-50 rounded-lg p-2">
+                      <div className="font-bold text-gray-900 text-xs">{game.opponentTopPlayer.name}</div>
+                      <div className="text-xs text-gray-600 font-semibold">{game.opponentTopPlayer.position}</div>
+                      <div className="text-xs font-black text-gray-900 mt-0.5">{game.opponentTopPlayer.stats}</div>
+                    </div>
+                  ) : (
+                    <div className="bg-gradient-to-br from-gray-100 to-gray-50 rounded-lg p-2 opacity-50">
+                      <div className="font-bold text-gray-900 text-xs">No Data</div>
+                      <div className="text-xs text-gray-600 font-semibold">-</div>
+                      <div className="text-xs font-black text-gray-900 mt-0.5">-</div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-2 text-gray-400 text-xs">
+                  No player stats available
+                </div>
+              )}
             </div>
           )}
 

@@ -63,9 +63,25 @@ export default async function handler(req, res) {
       const opponentLogo = opponentTeam?.team?.logos?.[0]?.href || null;
 
       // Extract top players/leaders for both teams
-      const extractTopPlayers = (teamData, teamName) => {
+      const gameStatus = competition.status?.type?.name || 'STATUS_SCHEDULED';
+
+      const extractTopPlayers = (teamData, teamName, espnStatus) => {
         if (!teamData?.leaders || teamData.leaders.length === 0) {
           console.warn(`⚠️ No leaders data for ${teamName} in game ${event.id}`);
+
+          // For completed games, return explicit empty state with flag
+          // This helps frontend differentiate "data unavailable" from "not yet available"
+          if (espnStatus === 'STATUS_FINAL') {
+            return {
+              name: null,
+              stats: null,
+              position: null,
+              athleteId: null,
+              dataUnavailable: true, // Flag: data was expected but not available
+            };
+          }
+
+          // For upcoming/live games, null is expected (stats not yet generated)
           return null;
         }
 
@@ -80,6 +96,18 @@ export default async function handler(req, res) {
         const player = topPlayer.passing || topPlayer.rushing || topPlayer.receiving;
         if (!player) {
           console.warn(`⚠️ No player stats available for ${teamName} in game ${event.id}`);
+
+          // Same logic: for completed games, flag as unavailable
+          if (espnStatus === 'STATUS_FINAL') {
+            return {
+              name: null,
+              stats: null,
+              position: null,
+              athleteId: null,
+              dataUnavailable: true,
+            };
+          }
+
           return null;
         }
 
@@ -88,14 +116,15 @@ export default async function handler(req, res) {
           stats: player.displayValue || '',
           position: topPlayer.passing ? 'QB' : topPlayer.rushing ? 'RB' : 'WR',
           athleteId: player.athlete?.id || null,
+          dataUnavailable: false, // Data is available
         };
 
         console.log(`✅ Top player for ${teamName}: ${playerData.name} (${playerData.position}) - ${playerData.stats}`);
         return playerData;
       };
 
-      const uwTopPlayer = extractTopPlayers(uwTeam, 'UW');
-      const opponentTopPlayer = extractTopPlayers(opponentTeam, opponentTeam?.team.displayName || 'Opponent');
+      const uwTopPlayer = extractTopPlayers(uwTeam, 'UW', gameStatus);
+      const opponentTopPlayer = extractTopPlayers(opponentTeam, opponentTeam?.team.displayName || 'Opponent', gameStatus);
 
       // Extract odds (if available)
       let oddsData = null;

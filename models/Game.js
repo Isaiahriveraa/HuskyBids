@@ -155,12 +155,14 @@ const GameSchema = new mongoose.Schema(
       stats: { type: String, default: null },
       position: { type: String, default: null },
       athleteId: { type: String, default: null },
+      dataUnavailable: { type: Boolean, default: false }, // Flag: data was expected but unavailable
     },
     opponentTopPlayer: {
       name: { type: String, default: null },
       stats: { type: String, default: null },
       position: { type: String, default: null },
       athleteId: { type: String, default: null },
+      dataUnavailable: { type: Boolean, default: false }, // Flag: data was expected but unavailable
     },
 
     // ESPN Odds Data (different from our betting odds)

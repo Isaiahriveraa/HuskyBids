@@ -9,7 +9,7 @@ import { Trophy, Flame, Award } from 'lucide-react';
  * Style C: Bold & Visual-Heavy
  * Handles both upcoming and completed games with bold colors and visual impact
  */
-export default function CardStyleC({ game, onClick }) {
+export default function CardStyleC({ game, onClick, className = '' }) {
   // Check if UW is home team (handle variations: "Washington", "Washington Huskies", etc.)
   const isUWHome = game.homeTeam?.toLowerCase().includes('washington') &&
                    !game.homeTeam?.toLowerCase().includes('state');
@@ -41,11 +41,11 @@ export default function CardStyleC({ game, onClick }) {
         transition: { type: "spring", stiffness: 300, damping: 20 }
       }}
       whileTap={{ scale: 0.98 }}
-      className="cursor-pointer"
+      className={`cursor-pointer ${className}`}
       onClick={onClick}
     >
       <div
-        className="rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300"
+        className="rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col h-full"
         style={{
           background: getHeaderBackground()
         }}
@@ -109,7 +109,7 @@ export default function CardStyleC({ game, onClick }) {
         </div>
 
         {/* Main Content - White Background */}
-        <div className="bg-white p-4">
+        <div className="bg-white p-4 flex-1 flex flex-col">
           {/* Team Matchup - Vertical Stack */}
           <div className="mb-4">
             {/* Washington Team */}

@@ -146,17 +146,17 @@ const CompletedGameCard = memo(({ game, onClick }) => {
               <span className="font-black text-xs text-gray-700 uppercase tracking-wider">Top Performers</span>
             </div>
 
-            {(game.uwTopPlayer || game.opponentTopPlayer) ? (
+            {(game.uwTopPlayer?.name || game.opponentTopPlayer?.name) ? (
               <div className="grid grid-cols-2 gap-2">
                 {/* UW Top Player or Placeholder */}
-                {game.uwTopPlayer ? (
+                {game.uwTopPlayer?.name ? (
                   <PlayerStatCard player={game.uwTopPlayer} isUW={true} />
                 ) : (
                   <PlaceholderCard isUW={true} team="UW" />
                 )}
 
                 {/* Opponent Top Player or Placeholder */}
-                {game.opponentTopPlayer ? (
+                {game.opponentTopPlayer?.name ? (
                   <PlayerStatCard
                     player={game.opponentTopPlayer}
                     isUW={false}

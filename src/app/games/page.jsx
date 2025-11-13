@@ -374,18 +374,19 @@ export default function GamesPage() {
       {/* Games Grid */}
       {!loading && games.length > 0 && (
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
           {games.map((game, index) => (
-            <motion.div key={`motion-${game._id}`} variants={itemVariants}>
+            <motion.div key={`motion-${game._id}`} variants={itemVariants} className="h-full flex">
               <ErrorBoundary key={`error-${game._id}`}>
                 <CardStyleC
                   key={game._id}
                   game={game}
                   onClick={() => game.canBet && handlePlaceBet(game)}
+                  className="h-full w-full"
                 />
               </ErrorBoundary>
             </motion.div>

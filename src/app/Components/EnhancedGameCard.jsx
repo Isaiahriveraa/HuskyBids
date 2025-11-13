@@ -93,16 +93,22 @@ const EnhancedGameCard = memo(({ game, onPlaceBet, selected = false, onClick }) 
               )}
               <div>
                 <div className="font-bold text-uw-purple-900">Washington Huskies</div>
-                {game.uwTopPlayer && (
-                  <div className="text-xs text-uw-purple-700 flex items-center gap-1">
-                    <User className="w-3 h-3" />
-                    <span className="font-semibold">{game.uwTopPlayer.name}</span>
-                    <span className="text-gray-600">• {game.uwTopPlayer.position}</span>
-                  </div>
-                )}
-                {game.uwTopPlayer?.stats && (
-                  <div className="text-xs text-gray-600 mt-0.5">{game.uwTopPlayer.stats}</div>
-                )}
+                {/* Always reserve space for player info */}
+                <div className="text-xs flex items-center gap-1 min-h-[20px]">
+                  {game.uwTopPlayer ? (
+                    <>
+                      <User className="w-3 h-3 text-uw-purple-700" />
+                      <span className="font-semibold text-uw-purple-700">{game.uwTopPlayer.name}</span>
+                      <span className="text-gray-600">• {game.uwTopPlayer.position}</span>
+                    </>
+                  ) : (
+                    <span className="text-gray-400 italic">No player data</span>
+                  )}
+                </div>
+                {/* Always reserve space for stats */}
+                <div className="text-xs text-gray-600 mt-0.5 min-h-[16px]">
+                  {game.uwTopPlayer?.stats || '-'}
+                </div>
               </div>
             </div>
             {game.status === 'completed' && (
@@ -134,16 +140,22 @@ const EnhancedGameCard = memo(({ game, onPlaceBet, selected = false, onClick }) 
               )}
               <div>
                 <div className="font-bold text-gray-900">{game.opponent}</div>
-                {game.opponentTopPlayer && (
-                  <div className="text-xs text-gray-700 flex items-center gap-1">
-                    <User className="w-3 h-3" />
-                    <span className="font-semibold">{game.opponentTopPlayer.name}</span>
-                    <span className="text-gray-600">• {game.opponentTopPlayer.position}</span>
-                  </div>
-                )}
-                {game.opponentTopPlayer?.stats && (
-                  <div className="text-xs text-gray-600 mt-0.5">{game.opponentTopPlayer.stats}</div>
-                )}
+                {/* Always reserve space for player info */}
+                <div className="text-xs flex items-center gap-1 min-h-[20px]">
+                  {game.opponentTopPlayer ? (
+                    <>
+                      <User className="w-3 h-3 text-gray-700" />
+                      <span className="font-semibold text-gray-700">{game.opponentTopPlayer.name}</span>
+                      <span className="text-gray-600">• {game.opponentTopPlayer.position}</span>
+                    </>
+                  ) : (
+                    <span className="text-gray-400 italic">No player data</span>
+                  )}
+                </div>
+                {/* Always reserve space for stats */}
+                <div className="text-xs text-gray-600 mt-0.5 min-h-[16px]">
+                  {game.opponentTopPlayer?.stats || '-'}
+                </div>
               </div>
             </div>
             {game.status === 'completed' && (

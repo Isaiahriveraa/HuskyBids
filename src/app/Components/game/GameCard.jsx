@@ -11,6 +11,9 @@ import PlayerStat from './PlayerStat';
 import BettingModal from '../BettingModal';
 import GameDetailsModal from '../GameDetailsModal';
 import BiscuitIcon from '../BiscuitIcon';
+import PlayerStatCard from './PlayerStatCard';
+import PlaceholderCard from './PlaceholderCard';
+import EmptyStateMessage from './EmptyStateMessage';
 
 /**
  * Unified Game Card Component
@@ -90,30 +93,37 @@ const GameCard = memo(({
             showScore={true}
           />
 
-          {/* Top Players Section */}
-          {(game.uwTopPlayer || game.opponentTopPlayer) && (
-            <div className="mt-4 pt-4 border-t-2 border-gray-100 dark:border-gray-700">
-              <div className="flex items-center gap-2 mb-2">
-                <Trophy className="w-4 h-4 text-yellow-500" />
-                <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">TOP PERFORMERS</span>
-              </div>
-              <div className="space-y-2">
-                {game.uwTopPlayer && (
-                  <PlayerStat
-                    player={game.uwTopPlayer}
-                    isUW={true}
-                  />
+          {/* Top Players Section - Always show for consistent card heights */}
+          <div className="mt-4 pt-4 border-t-2 border-gray-100 dark:border-gray-700">
+            <div className="flex items-center gap-2 mb-2">
+              <Trophy className="w-4 h-4 text-yellow-500" />
+              <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">TOP PERFORMERS</span>
+            </div>
+
+            {(game.uwTopPlayer || game.opponentTopPlayer) ? (
+              <div className="grid grid-cols-2 gap-2">
+                {/* UW Top Player or Placeholder */}
+                {game.uwTopPlayer ? (
+                  <PlayerStatCard player={game.uwTopPlayer} isUW={true} />
+                ) : (
+                  <PlaceholderCard isUW={true} team="UW" />
                 )}
-                {game.opponentTopPlayer && (
-                  <PlayerStat
+
+                {/* Opponent Top Player or Placeholder */}
+                {game.opponentTopPlayer ? (
+                  <PlayerStatCard
                     player={game.opponentTopPlayer}
                     isUW={false}
                     opponentAbbrev={game.opponent?.substring(0, 3).toUpperCase() || 'OPP'}
                   />
+                ) : (
+                  <PlaceholderCard isUW={false} team="Opponent" />
                 )}
               </div>
-            </div>
-          )}
+            ) : (
+              <EmptyStateMessage message="Player stats unavailable for this game" />
+            )}
+          </div>
 
           {/* Betting Stats */}
           {showStats && (

@@ -14,7 +14,7 @@ import {
   Settings,
   Menu,
   X,
-  History
+  Gamepad2
 } from 'lucide-react';
 import BiscuitIcon from '../BiscuitIcon';
 import DarkModeToggle from './DarkModeToggle';
@@ -22,7 +22,7 @@ import DarkModeToggle from './DarkModeToggle';
 const navigationItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Place Bet', href: '/new-bid', icon: Calendar },
-  { name: 'Past Games', href: '/past-games', icon: History },
+  { name: 'Games', href: '/games', icon: Gamepad2 },
   { name: 'Leaderboard', href: '/leaderboard', icon: Trophy },
   { name: 'My Bets', href: '/betting-history', icon: TrendingUp },
   { name: 'Tasks', href: '/tasks', icon: CheckSquare },

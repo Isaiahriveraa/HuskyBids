@@ -49,13 +49,27 @@ export default async function handler(req, res) {
       try {
         const currentYear = new Date().getFullYear();
         const baseUrl = getBaseUrl();
-        const sportToSync = sport === 'all' ? 'football' : sport;
 
-        console.log(`🔄 Auto-syncing ${sportToSync} season ${currentYear}...`);
+        // If 'all' sports selected, sync both football and basketball
+        if (sport === 'all') {
+          console.log(`🔄 Auto-syncing all sports for season ${currentYear}...`);
 
-        await fetch(`${baseUrl}/api/games/sync?sport=${sportToSync}&season=${currentYear}&force=true`, {
-          method: 'POST',
-        });
+          // Sync football
+          await fetch(`${baseUrl}/api/games/sync?sport=football&season=${currentYear}&force=true`, {
+            method: 'POST',
+          });
+
+          // Sync basketball
+          await fetch(`${baseUrl}/api/games/sync?sport=basketball&season=${currentYear}&force=true`, {
+            method: 'POST',
+          });
+        } else {
+          console.log(`🔄 Auto-syncing ${sport} season ${currentYear}...`);
+
+          await fetch(`${baseUrl}/api/games/sync?sport=${sport}&season=${currentYear}&force=true`, {
+            method: 'POST',
+          });
+        }
 
         // Re-fetch games after sync
         games = await Game.find(query)

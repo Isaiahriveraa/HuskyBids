@@ -101,6 +101,12 @@ module.exports = {
         '88': '22rem',
         '128': '32rem',
       },
+
+      // 3D Perspective for card flips
+      perspective: {
+        '1000': '1000px',
+        '2000': '2000px',
+      },
       
       // Border Radius
       borderRadius: {

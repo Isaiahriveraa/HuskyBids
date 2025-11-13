@@ -1,15 +1,15 @@
 'use client';
 
-import React, { memo } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Trophy, Users, TrendingUp } from 'lucide-react';
+import { Trophy, Flame, Award } from 'lucide-react';
 
 /**
- * CompletedGameCard - Style C Design
- * Bold visual style with winning team's color header
+ * Style C: Bold & Visual-Heavy
+ * Handles both upcoming and completed games with bold colors and visual impact
  */
-const CompletedGameCard = memo(({ game, onClick }) => {
+export default function CardStyleC({ game, onClick }) {
   // Check if UW is home team (handle variations: "Washington", "Washington Huskies", etc.)
   const isUWHome = game.homeTeam?.toLowerCase().includes('washington') &&
                    !game.homeTeam?.toLowerCase().includes('state');
@@ -20,9 +20,21 @@ const CompletedGameCard = memo(({ game, onClick }) => {
   // Fix: Check if UW won based on home/away status and winner field
   const isUWWinner = (isUWHome && game.winner === 'home') || (!isUWHome && game.winner === 'away');
 
+  const isCompleted = game.status === 'completed';
+  const isUpcoming = game.status === 'scheduled';
+
+  // Determine header background
+  const getHeaderBackground = () => {
+    if (isCompleted) {
+      return isUWWinner
+        ? 'linear-gradient(to bottom right, #4B2E83, #3D2569)' // UW Purple
+        : 'linear-gradient(to bottom right, #6B7280, #4B5563)'; // Gray
+    }
+    return 'linear-gradient(to bottom right, #4B2E83, #3D2569)'; // Default UW Purple for upcoming
+  };
+
   return (
     <motion.div
-      onClick={onClick}
       whileHover={{
         y: -6,
         scale: 1.02,
@@ -30,44 +42,66 @@ const CompletedGameCard = memo(({ game, onClick }) => {
       }}
       whileTap={{ scale: 0.98 }}
       className="cursor-pointer"
+      onClick={onClick}
     >
       <div
         className="rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300"
         style={{
-          background: isUWWinner
-            ? 'linear-gradient(to bottom right, #4B2E83, #3D2569)'
-            : 'linear-gradient(to bottom right, #6B7280, #4B5563)'
+          background: getHeaderBackground()
         }}
       >
-        {/* Header with winning team logo */}
+        {/* Bold Header */}
         <div className="bg-black/20 backdrop-blur-sm px-4 py-2.5 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            {/* Winning Team Logo */}
-            {isUWWinner && game.uwLogo && (
-              <div className="relative w-6 h-6 flex-shrink-0">
-                <Image
-                  src={game.uwLogo}
-                  alt="UW Logo"
-                  fill
-                  className="object-contain"
-                  quality={85}
-                />
-              </div>
+            {/* Logo and Status */}
+            {isCompleted ? (
+              <>
+                {/* Show winning team logo for completed games */}
+                {isUWWinner && game.uwLogo && (
+                  <div className="relative w-6 h-6 flex-shrink-0">
+                    <Image
+                      src={game.uwLogo}
+                      alt="UW Logo"
+                      fill
+                      className="object-contain"
+                      quality={85}
+                    />
+                  </div>
+                )}
+                {!isUWWinner && game.opponentLogo && (
+                  <div className="relative w-6 h-6 flex-shrink-0">
+                    <Image
+                      src={game.opponentLogo}
+                      alt="Opponent Logo"
+                      fill
+                      className="object-contain"
+                      quality={85}
+                    />
+                  </div>
+                )}
+                <span className="text-white font-bold text-base">
+                  {isUWWinner ? 'HUSKIES VICTORY' : 'TOUGH LOSS'}
+                </span>
+              </>
+            ) : (
+              <>
+                {/* Show UW logo for upcoming games */}
+                {game.uwLogo && (
+                  <div className="relative w-6 h-6 flex-shrink-0">
+                    <Image
+                      src={game.uwLogo}
+                      alt="UW Logo"
+                      fill
+                      className="object-contain"
+                      quality={85}
+                    />
+                  </div>
+                )}
+                <span className="text-white font-bold text-base">
+                  {game.formattedDate || 'UPCOMING GAME'}
+                </span>
+              </>
             )}
-            {!isUWWinner && game.opponentLogo && (
-              <div className="relative w-6 h-6 flex-shrink-0">
-                <Image
-                  src={game.opponentLogo}
-                  alt="Opponent Logo"
-                  fill
-                  className="object-contain"
-                  quality={85}
-                />
-              </div>
-            )}
-            <span className="text-white font-bold text-base">
-              {isUWWinner ? 'HUSKIES VICTORY' : 'TOUGH LOSS'}
-            </span>
           </div>
           <div className="text-white/90 text-xs font-semibold uppercase tracking-wider">
             {game.sport}
@@ -96,15 +130,28 @@ const CompletedGameCard = memo(({ game, onClick }) => {
                 <div>
                   <div className="font-black text-base text-uw-purple-900">WASHINGTON</div>
                   <div className="text-xs text-gray-500 font-semibold uppercase tracking-wide">Huskies</div>
+                  {!isCompleted && game.homeOdds && (
+                    <div className="text-xs text-uw-purple-600 font-bold mt-0.5">
+                      Odds: {isUWHome ? game.homeOdds : game.awayOdds}x
+                    </div>
+                  )}
                 </div>
               </div>
-              <motion.div
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className={`text-4xl font-black ${isUWWinner ? 'text-uw-purple-600' : 'text-gray-600'}`}
-              >
-                {uwScore}
-              </motion.div>
+              {isCompleted ? (
+                <motion.div
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className={`text-4xl font-black ${isUWWinner ? 'text-uw-purple-600' : 'text-gray-600'}`}
+                >
+                  {uwScore}
+                </motion.div>
+              ) : (
+                <div className="text-right">
+                  {game.canBet && (
+                    <div className="text-xs text-green-600 font-bold uppercase">Open</div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* VS Divider */}
@@ -128,16 +175,29 @@ const CompletedGameCard = memo(({ game, onClick }) => {
                 <div>
                   <div className="font-black text-base text-gray-900">{game.opponent.toUpperCase()}</div>
                   <div className="text-xs text-gray-500 font-semibold uppercase tracking-wide">Opponent</div>
+                  {!isCompleted && game.awayOdds && (
+                    <div className="text-xs text-gray-600 font-bold mt-0.5">
+                      Odds: {isUWHome ? game.awayOdds : game.homeOdds}x
+                    </div>
+                  )}
                 </div>
               </div>
-              <div className={`text-4xl font-black ${!isUWWinner ? 'text-gray-800' : 'text-gray-600'}`}>
-                {opponentScore}
-              </div>
+              {isCompleted ? (
+                <div className={`text-4xl font-black ${!isUWWinner ? 'text-gray-800' : 'text-gray-600'}`}>
+                  {opponentScore}
+                </div>
+              ) : (
+                <div className="text-right">
+                  {game.formattedTime && (
+                    <div className="text-xs text-gray-500 font-semibold">{game.formattedTime}</div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Top Performers - Compact */}
-          {(game.uwTopPlayer || game.opponentTopPlayer) && (
+          {/* Top Performers - Compact (Only for completed games) */}
+          {isCompleted && (game.uwTopPlayer || game.opponentTopPlayer) && (
             <div className="border-t-2 border-gray-200 pt-3 mb-3">
               <div className="flex items-center justify-center gap-1.5 mb-2">
                 <Trophy className="w-4 h-4 text-yellow-500" />
@@ -185,8 +245,4 @@ const CompletedGameCard = memo(({ game, onClick }) => {
       </div>
     </motion.div>
   );
-});
-
-CompletedGameCard.displayName = 'CompletedGameCard';
-
-export default CompletedGameCard;
+}

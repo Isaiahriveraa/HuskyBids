@@ -7,6 +7,7 @@
 
 import React, { useState, memo, useCallback } from 'react';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 import { Card, Button, Badge } from './ui';
 import BiscuitIcon from './BiscuitIcon';
 import GameDetailsModal from './GameDetailsModal';
@@ -24,13 +25,28 @@ const EnhancedGameCard = memo(({ game, onPlaceBet, selected = false, onClick }) 
   const { isUWHome, uwTeam, opponentTeam } = getTeamPositions(game);
 
   return (
-    <Card
-      variant="elevated"
-      className={`hover:shadow-2xl transition-all cursor-pointer ${
-        selected ? 'ring-2 ring-uw-purple-500 shadow-xl' : ''
-      }`}
-      onClick={onClick}
+    <motion.div
+      whileHover={{
+        y: -8,
+        scale: 1.02,
+        rotateY: 2,
+        transition: {
+          type: "spring",
+          stiffness: 300,
+          damping: 20
+        }
+      }}
+      whileTap={{ scale: 0.98 }}
+      style={{ perspective: 1000 }}
+      className="h-full"
     >
+      <Card
+        variant="elevated"
+        className={`h-full transition-all cursor-pointer hover:shadow-2xl hover:shadow-uw-purple-500/20 ${
+          selected ? 'ring-2 ring-uw-purple-500 shadow-xl' : ''
+        }`}
+        onClick={onClick}
+      >
       <Card.Header>
         <div className="flex items-start justify-between">
           <div className="flex gap-2">
@@ -326,6 +342,7 @@ const EnhancedGameCard = memo(({ game, onPlaceBet, selected = false, onClick }) 
         onClose={() => setIsDetailsModalOpen(false)}
       />
     </Card>
+    </motion.div>
   );
 });
 

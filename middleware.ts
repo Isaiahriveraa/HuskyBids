@@ -25,7 +25,6 @@ export default authMiddleware({
       '/leaderboard',
       '/settings',
       '/new-bid',
-      '/past-games',
       '/tasks',
       '/change-password',
       '/change-username',

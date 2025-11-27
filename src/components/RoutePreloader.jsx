@@ -20,7 +20,6 @@ export default function RoutePreloader() {
         '/leaderboard',
         '/betting-history',
         '/tasks',
-        '/settings',
       ];
 
       routesToPreload.forEach((route) => {

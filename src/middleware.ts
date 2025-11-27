@@ -23,7 +23,6 @@ export default authMiddleware({
       '/betting-history',
       '/games',
       '/leaderboard',
-      '/settings',
       '/new-bid',
       '/tasks',
       '/change-password',

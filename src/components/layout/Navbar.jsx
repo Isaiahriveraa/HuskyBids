@@ -11,7 +11,6 @@ import {
   Trophy,
   TrendingUp,
   CheckSquare,
-  Settings,
   Menu,
   X,
   Gamepad2
@@ -26,7 +25,6 @@ const navigationItems = [
   { name: 'Leaderboard', href: '/leaderboard', icon: Trophy },
   { name: 'My Bets', href: '/betting-history', icon: TrendingUp },
   { name: 'Tasks', href: '/tasks', icon: CheckSquare },
-  { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
 export default function Navbar({ biscuits = 0, loading = false }) {

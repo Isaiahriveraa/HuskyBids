@@ -1,136 +1,113 @@
 'use client';
 
-import { useState } from 'react';
+import { ArrowRight, Circle } from '@phosphor-icons/react';
 
-// OPTION 5: "Minimal List" - Linear/Notion-inspired
-// Ultra clean, text-focused, keyboard shortcuts, power-user feel
+// COMBINED: Ultra Minimal + Notion
+// Dotted borders, monospace, keyboard shortcuts, extreme whitespace
 
 export default function ExperimentsPage() {
-  const [filter, setFilter] = useState('all');
   const balance = 24500;
 
-  const items = [
-    { id: 1, type: 'live', teams: 'UW vs Oregon', score: '24-21', time: 'Q3 12:45', odds: '+145', tag: 'CFB' },
-    { id: 2, type: 'live', teams: 'Kraken vs Knights', score: '2-2', time: 'OT', odds: '-110', tag: 'NHL' },
-    { id: 3, type: 'upcoming', teams: 'Seahawks vs 49ers', score: null, time: 'Tomorrow 1:25p', odds: '+110', tag: 'NFL' },
-    { id: 4, type: 'upcoming', teams: 'Lakers vs Celtics', score: null, time: 'Wed 5:00p', odds: '-105', tag: 'NBA' },
-    { id: 5, type: 'bet', teams: 'UW Moneyline', result: 'won', amount: '+760', time: '12m ago', tag: null },
-    { id: 6, type: 'bet', teams: 'Kraken Over 4.5', result: 'pending', amount: '200', time: 'active', tag: null },
-    { id: 7, type: 'bet', teams: 'Lakers +4.5', result: 'lost', amount: '-320', time: '3h ago', tag: null },
+  const games = [
+    { id: 1, key: 'G', team1: 'Washington', team2: 'Oregon', score1: 24, score2: 21, live: true },
+    { id: 2, key: 'H', team1: 'Kraken', team2: 'Knights', score1: 2, score2: 2, live: true },
+    { id: 3, key: 'J', team1: 'Seahawks', team2: '49ers', time: '7:00 PM', live: false },
   ];
 
-  const filters = [
-    { id: 'all', label: 'All', key: 'A' },
-    { id: 'live', label: 'Live', key: 'L' },
-    { id: 'upcoming', label: 'Upcoming', key: 'U' },
-    { id: 'bet', label: 'My Bets', key: 'B' },
+  const quickBets = [
+    { id: 1, key: '1', label: 'UW ML', odds: '+145' },
+    { id: 2, key: '2', label: 'SEA -3.5', odds: '+110' },
+    { id: 3, key: '3', label: 'Over 47.5', odds: '-110' },
   ];
-
-  const filtered = filter === 'all' ? items : items.filter(i => i.type === filter);
 
   return (
-    <div className="py-6 font-mono">
-      {/* Header */}
-      <div className="flex items-baseline justify-between mb-8">
-        <div>
-          <h1 className="text-sm text-white/40 uppercase tracking-widest">Balance</h1>
-          <p className="text-3xl font-light tabular-nums">{balance.toLocaleString()}</p>
-        </div>
-        <button className="text-xs border border-white/20 px-3 py-1.5 rounded hover:bg-white/5 transition-colors">
-          + New Bet
-        </button>
+    <div className="py-8 space-y-10 font-mono">
+      {/* Balance */}
+      <div>
+        <p className="text-[10px] text-zinc-600 uppercase tracking-[0.2em] mb-2">Balance</p>
+        <p className="text-4xl font-light tracking-tight">{balance.toLocaleString()}</p>
       </div>
 
-      {/* Filters */}
-      <div className="flex gap-1 mb-6 text-xs">
-        {filters.map((f) => (
-          <button
-            key={f.id}
-            onClick={() => setFilter(f.id)}
-            className={`px-3 py-1.5 rounded transition-colors flex items-center gap-2 ${
-              filter === f.id 
-                ? 'bg-white/10 text-white' 
-                : 'text-white/40 hover:text-white/60'
-            }`}
-          >
-            {f.label}
-            <kbd className="text-[10px] bg-white/5 px-1 rounded">{f.key}</kbd>
-          </button>
-        ))}
-      </div>
+      {/* Dotted divider */}
+      <div className="border-t border-dotted border-zinc-800" />
 
-      {/* List */}
-      <div className="border-t border-white/10">
-        {filtered.map((item, i) => (
-          <div 
-            key={item.id}
-            className="flex items-center justify-between py-3 border-b border-white/5 hover:bg-white/[0.02] cursor-pointer group"
-          >
-            <div className="flex items-center gap-4 flex-1 min-w-0">
-              {/* Index */}
-              <span className="text-xs text-white/20 w-4">{i + 1}</span>
-              
-              {/* Status indicator */}
-              <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                item.type === 'live' ? 'bg-red-400' :
-                item.type === 'upcoming' ? 'bg-white/20' :
-                item.result === 'won' ? 'bg-green-400' :
-                item.result === 'lost' ? 'bg-red-400' :
-                'bg-amber-400'
-              }`} />
-              
-              {/* Main content */}
-              <div className="flex-1 min-w-0">
-                <p className="truncate">{item.teams}</p>
+      {/* Quick bets with keyboard shortcuts */}
+      <div>
+        <p className="text-[10px] text-zinc-600 uppercase tracking-[0.2em] mb-4">Quick bets</p>
+        <div className="space-y-2">
+          {quickBets.map((bet) => (
+            <button
+              key={bet.id}
+              className="w-full flex items-center justify-between py-3 px-4 border border-dotted border-zinc-800 hover:border-zinc-600 hover:bg-zinc-900/50 transition-all group"
+            >
+              <div className="flex items-center gap-4">
+                <kbd className="w-6 h-6 flex items-center justify-center text-[10px] border border-zinc-700 text-zinc-500 group-hover:border-zinc-500 group-hover:text-zinc-300">
+                  {bet.key}
+                </kbd>
+                <span className="text-sm text-zinc-400 group-hover:text-white">{bet.label}</span>
               </div>
-
-              {/* Tag */}
-              {item.tag && (
-                <span className="text-[10px] text-white/30 uppercase">{item.tag}</span>
-              )}
-            </div>
-
-            <div className="flex items-center gap-6 text-sm">
-              {/* Score or Amount */}
-              {item.score ? (
-                <span className="tabular-nums text-white/60">{item.score}</span>
-              ) : item.amount ? (
-                <span className={`tabular-nums ${
-                  item.result === 'won' ? 'text-green-400' :
-                  item.result === 'lost' ? 'text-red-400' :
-                  'text-white/60'
-                }`}>{item.amount}</span>
-              ) : null}
-
-              {/* Time */}
-              <span className={`text-xs tabular-nums w-20 text-right ${
-                item.type === 'live' ? 'text-red-400' : 'text-white/30'
-              }`}>
-                {item.time}
-              </span>
-
-              {/* Odds (for games) */}
-              {item.odds && (
-                <span className="text-xs text-green-400 w-12 text-right tabular-nums">
-                  {item.odds}
-                </span>
-              )}
-
-              {/* Action hint */}
-              <span className="text-white/0 group-hover:text-white/20 transition-colors text-xs">
-                →
-              </span>
-            </div>
-          </div>
-        ))}
+              <span className="text-sm text-zinc-300">{bet.odds}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Footer hint */}
-      <div className="mt-8 text-xs text-white/20 flex items-center gap-4">
-        <span><kbd className="bg-white/5 px-1 rounded">↑↓</kbd> navigate</span>
-        <span><kbd className="bg-white/5 px-1 rounded">enter</kbd> select</span>
-        <span><kbd className="bg-white/5 px-1 rounded">n</kbd> new bet</span>
+      {/* Dotted divider */}
+      <div className="border-t border-dotted border-zinc-800" />
+
+      {/* Games list with keyboard hints */}
+      <div>
+        <p className="text-[10px] text-zinc-600 uppercase tracking-[0.2em] mb-4">Games</p>
+        <div className="space-y-0">
+          {games.map((game, i) => (
+            <div key={game.id}>
+              <button className="w-full py-5 flex items-center justify-between group">
+                <div className="flex items-center gap-4">
+                  <kbd className="w-6 h-6 flex items-center justify-center text-[10px] border border-zinc-800 text-zinc-600 group-hover:border-zinc-600 group-hover:text-zinc-400">
+                    {game.key}
+                  </kbd>
+                  {game.live && (
+                    <Circle size={6} weight="fill" className="text-red-500 animate-pulse" />
+                  )}
+                  <div className="text-left">
+                    <p className="text-sm">
+                      <span className="text-zinc-300">{game.team1}</span>
+                      <span className="text-zinc-700 mx-2">v</span>
+                      <span className="text-zinc-300">{game.team2}</span>
+                    </p>
+                    {game.live ? (
+                      <p className="text-xs text-zinc-600 mt-0.5">
+                        {game.score1} — {game.score2}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-zinc-700 mt-0.5">{game.time}</p>
+                    )}
+                  </div>
+                </div>
+                <ArrowRight size={14} className="text-zinc-800 group-hover:text-zinc-500 group-hover:translate-x-1 transition-all" />
+              </button>
+              {i < games.length - 1 && (
+                <div className="border-t border-dotted border-zinc-900" />
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Dotted divider */}
+      <div className="border-t border-dotted border-zinc-800" />
+
+      {/* Minimal actions */}
+      <div className="flex items-center justify-between text-xs text-zinc-600">
+        <div className="flex items-center gap-6">
+          <span><kbd className="px-1.5 py-0.5 border border-zinc-800 mr-2">A</kbd>All games</span>
+          <span><kbd className="px-1.5 py-0.5 border border-zinc-800 mr-2">N</kbd>New bet</span>
+        </div>
+        <span className="text-zinc-700"><kbd className="px-1.5 py-0.5 border border-zinc-800 mr-2">?</kbd>Help</span>
       </div>
     </div>
   );
 }
+
+
+

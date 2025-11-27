@@ -1,28 +1,17 @@
 'use client';
 
 import { useMemo } from 'react';
-import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { useUserContext } from '../contexts/UserContext';
 import { useUserStats } from '../hooks/useAPI';
-import BiscuitIcon from '@components/BiscuitIcon';
-import ErrorBoundary from '@components/ErrorBoundary';
-import ErrorState from '@components/ErrorState';
-import { DashboardSkeleton, SkeletonCard } from '@components/ui/LoadingSkeleton';
-
-// Lazy load heavy components
-const GameCalendar = dynamic(() => import('@components/GameCalendar'), {
-  loading: () => <SkeletonCard />,
-  ssr: false,
-});
-
-const StatsGrid = dynamic(() => import('@components/dashboard/StatsGrid'), {
-  loading: () => <SkeletonCard />,
-});
-
-const BettingChart = dynamic(() => import('@components/dashboard/BettingChart'), {
-  loading: () => <SkeletonCard />,
-  ssr: false,
-});
+import {
+  BalanceDisplay,
+  DottedDivider,
+  SectionLabel,
+  StatCard,
+  BetHistoryRow,
+  ActionBar,
+} from '@/components/experimental';
 
 export default function Dashboard() {
   const { user, loading: userLoading } = useUserContext();
@@ -30,166 +19,116 @@ export default function Dashboard() {
 
   const loading = isLoading || userLoading;
 
-  // Memoize profit/loss color calculation
-  const profitLossColor = useMemo(() => {
-    if (!stats) return 'text-gray-600';
-    if (stats.profitLoss > 0) return 'text-green-600';
-    if (stats.profitLoss < 0) return 'text-red-600';
-    return 'text-gray-600';
-  }, [stats]);
-
-  // Memoize win rate color
-  const winRateColor = useMemo(() => {
-    if (!stats) return 'text-red-600';
-    return stats.winRate >= 50 ? 'text-green-600' : 'text-red-600';
-  }, [stats]);
-
-  // Memoize win rate bar color
-  const winRateBarColor = useMemo(() => {
-    if (!stats) return 'bg-red-600';
-    return stats.winRate >= 50 ? 'bg-green-600' : 'bg-red-600';
-  }, [stats]);
-
-  // Loading state
-  if (loading || userLoading) {
-    return <DashboardSkeleton />;
+  // Loading state - minimal skeleton
+  if (loading) {
+    return (
+      <div className="py-8 space-y-6 font-mono animate-pulse">
+        <div className="h-12 bg-zinc-900 rounded w-32" />
+        <div className="border-t border-dotted border-zinc-800" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-24 bg-zinc-900 border border-dotted border-zinc-800" />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   // Error state
   if (error) {
     return (
-      <div className="p-6">
-        <h1 className="text-3xl font-bold text-purple-900 dark:text-purple-300 mb-6">Dashboard</h1>
-        <ErrorState
-          error={error}
-          showReload={true}
-        />
+      <div className="py-8 font-mono">
+        <SectionLabel>Error</SectionLabel>
+        <p className="text-zinc-500 text-sm mt-2">{error}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="mt-4 text-xs text-zinc-600 hover:text-zinc-400 underline"
+        >
+          Reload page
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="p-2 sm:p-4 md:p-6">
-      {/* Header with Welcome Message */}
-      <div className="mb-4 md:mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-purple-900 dark:text-purple-300">
-          Welcome back, {stats?.username || 'User'}! 👋
-        </h1>
-        <p className="text-sm md:text-base text-gray-600 dark:text-gray-300 mt-2">
-          Here's your betting overview and upcoming games
-        </p>
-      </div>
+    <div className="py-8 space-y-8 font-mono">
+      {/* Balance */}
+      <BalanceDisplay balance={stats?.biscuits || 0} />
 
-      {/* Enhanced Stats Grid */}
-      <div className="mb-6 md:mb-8">
-        <StatsGrid stats={{
-          balance: stats?.biscuits,
-          totalWagered: stats?.totalWagered || stats?.totalBets * 50, // Approximate if not available
-          totalWon: stats?.totalBiscuitsWon || 0,
-          profitLoss: stats?.profitLoss || 0,
-          winRate: stats?.winRate || 0,
-          totalWageredChange: null, // Can be calculated if historical data available
-          totalWonChange: null,
-          profitLossChange: null,
-          winRateChange: null,
-        }} />
-      </div>
+      <DottedDivider />
 
-      {/* Secondary Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 lg:gap-6 mb-6 md:mb-8">
-        {/* Profit/Loss */}
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow dark:shadow-slate-900/50 transition-all duration-300">
-          <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase mb-2">Net Profit/Loss</h2>
-          <p className={`text-3xl font-bold ${profitLossColor} dark:brightness-110`}>
-            {stats?.profitLoss >= 0 ? '+' : ''}{stats?.profitLoss?.toLocaleString() || 0}
-          </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            ROI: {stats?.roi >= 0 ? '+' : ''}{stats?.roi || 0}%
-          </p>
-        </div>
-
-        {/* Pending Bets */}
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow dark:shadow-slate-900/50 transition-all duration-300">
-          <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase mb-2">Pending Bets</h2>
-          <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{stats?.pendingBets || 0}</p>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            {stats?.pendingAmount?.toLocaleString() || 0} biscuits at risk
-          </p>
-        </div>
-
-        {/* Potential Winnings */}
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow dark:shadow-slate-900/50 transition-all duration-300">
-          <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase mb-2">Potential Winnings</h2>
-          <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-            {stats?.potentialWinnings?.toLocaleString() || 0}
-          </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">From pending bets</p>
+      {/* Stats Grid */}
+      <div>
+        <SectionLabel className="mb-4">Stats</SectionLabel>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <StatCard 
+            label="Win Rate" 
+            value={`${stats?.winRate || 0}%`}
+            size="sm"
+          />
+          <StatCard 
+            label="Total Bets" 
+            value={stats?.totalBets || 0}
+            size="sm"
+          />
+          <StatCard 
+            label="Profit/Loss" 
+            value={stats?.profitLoss || 0}
+            prefix={stats?.profitLoss >= 0 ? '+' : ''}
+            negative={stats?.profitLoss < 0}
+            size="sm"
+          />
+          <StatCard 
+            label="Pending" 
+            value={stats?.pendingBets || 0}
+            trend={stats?.pendingAmount ? `${stats.pendingAmount.toLocaleString()} at risk` : null}
+            size="sm"
+          />
         </div>
       </div>
+
+      <DottedDivider />
 
       {/* Recent Activity */}
-      <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-lg shadow dark:shadow-slate-900/50 mb-6 md:mb-8 transition-all duration-300">
-        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Recent Activity</h2>
+      <div>
+        <SectionLabel className="mb-4">Recent Activity</SectionLabel>
         {stats?.recentActivity && stats.recentActivity.length > 0 ? (
-          <div className="space-y-3">
-            {stats.recentActivity.map((activity) => (
-              <div
+          <div className="border border-dotted border-zinc-800">
+            {stats.recentActivity.slice(0, 5).map((activity) => (
+              <BetHistoryRow
                 key={activity.id}
-                className="flex justify-between items-center p-4 bg-gray-50 dark:bg-slate-700 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors"
-              >
-                <div>
-                  <p className="font-semibold text-gray-800 dark:text-gray-200">{activity.game}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    Bet {activity.amount} biscuits on {activity.prediction} at {activity.odds}x odds
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    {new Date(activity.placedAt).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      hour: 'numeric',
-                      minute: '2-digit',
-                    })}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <span
-                    className={`font-semibold ${
-                      activity.resultColor === 'green'
-                        ? 'text-green-600 dark:text-green-400'
-                        : activity.resultColor === 'red'
-                        ? 'text-red-600 dark:text-red-400'
-                        : activity.resultColor === 'blue'
-                        ? 'text-blue-600 dark:text-blue-400'
-                        : 'text-gray-600 dark:text-gray-400'
-                    }`}
-                  >
-                    {activity.result}
-                  </span>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 capitalize">{activity.status}</p>
-                </div>
-              </div>
+                game={activity.game}
+                prediction={activity.prediction}
+                amount={activity.amount}
+                odds={activity.odds}
+                status={activity.status}
+                payout={activity.payout}
+              />
             ))}
           </div>
         ) : (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            <p className="mb-2">No betting activity yet</p>
-            <p className="text-sm">
-              Place your first bet on the{' '}
-              <a href="/games" className="text-purple-600 dark:text-purple-400 hover:underline">
-                Games page
-              </a>
-            </p>
+          <div className="py-8 text-center border border-dotted border-zinc-800">
+            <p className="text-zinc-600 text-sm">No betting activity yet</p>
+            <Link 
+              href="/games" 
+              className="text-zinc-500 text-xs hover:text-zinc-400 underline mt-2 inline-block"
+            >
+              Place your first bet
+            </Link>
           </div>
         )}
       </div>
 
-      {/* Upcoming Games Calendar */}
-      <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-lg shadow dark:shadow-slate-900/50 transition-all duration-300">
-        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Upcoming Games</h2>
-        <ErrorBoundary>
-          <GameCalendar sport="football" />
-        </ErrorBoundary>
-      </div>
+      <DottedDivider />
+
+      {/* Actions */}
+      <ActionBar
+        actions={[
+          { key: 'G', label: 'Games' },
+          { key: 'N', label: 'New bet' },
+          { key: 'B', label: 'All bets' },
+        ]}
+      />
     </div>
   );
 }

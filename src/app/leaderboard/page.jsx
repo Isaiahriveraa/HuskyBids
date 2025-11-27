@@ -1,20 +1,15 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
-import dynamic from 'next/dynamic';
+import React, { useState } from 'react';
 import { useUserContext } from '../contexts/UserContext';
 import { useLeaderboard } from '../hooks/useAPI';
-import BiscuitIcon from '@components/BiscuitIcon';
-import ErrorState from '@components/ErrorState';
-import { LeaderboardSkeleton, SkeletonCard } from '@components/ui/LoadingSkeleton';
-import { Button, Tabs } from '@components/ui';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-
-// Lazy load Podium component
-const Podium = dynamic(() => import('@components/leaderboard/Podium'), {
-  loading: () => <SkeletonCard />,
-  ssr: false,
-});
+import {
+  SectionLabel,
+  DottedDivider,
+  LeaderboardRow,
+  Kbd,
+  ActionBar,
+} from '@/components/experimental';
 
 const LeaderboardPage = () => {
   const { user } = useUserContext();
@@ -32,38 +27,31 @@ const LeaderboardPage = () => {
     currentPage
   } = useLeaderboard(itemsPerPage, period, page);
 
-  // Memoize podium positions to avoid recalculation on every render
-  const podiumPositions = useMemo(() => {
-    if (!leaderboard || leaderboard.length < 3) {
-      return { first: null, second: null, third: null, rest: [] };
-    }
-    const [first, second, third, ...rest] = leaderboard;
-    return { first, second, third, rest };
-  }, [leaderboard]);
-
-  // Memoize current user position check - only show if not on current page
-  const userPositionInfo = useMemo(() => {
-    if (!user || !leaderboard) {
-      return { showCustomPosition: false };
-    }
-    const isOnCurrentPage = leaderboard.find(u => u._id?.toString() === user._id?.toString());
-    return { showCustomPosition: !isOnCurrentPage };
-  }, [user, leaderboard]);
-
-  // Loading state
+  // Loading state - minimal skeleton
   if (loading) {
-    return <LeaderboardSkeleton />;
+    return (
+      <div className="py-8 space-y-4 font-mono animate-pulse">
+        <div className="h-4 bg-zinc-900 rounded w-24" />
+        <div className="border-t border-dotted border-zinc-800" />
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="h-12 bg-zinc-900/50" />
+        ))}
+      </div>
+    );
   }
 
   // Error state
   if (error) {
     return (
-      <div className="p-8">
-        <h1 className="text-3xl font-bold text-purple-900 dark:text-purple-300 mb-8">Leaderboard</h1>
-        <ErrorState
-          error={error}
-          showReload={true}
-        />
+      <div className="py-8 font-mono">
+        <SectionLabel>Error</SectionLabel>
+        <p className="text-zinc-500 text-sm mt-2">{error}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="mt-4 text-xs text-zinc-600 hover:text-zinc-400 underline"
+        >
+          Reload page
+        </button>
       </div>
     );
   }
@@ -71,17 +59,15 @@ const LeaderboardPage = () => {
   // No users state
   if (leaderboard.length === 0) {
     return (
-      <div className="p-8">
-        <h1 className="text-3xl font-bold text-purple-900 dark:text-purple-300 mb-8">Leaderboard</h1>
-        <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-          <p className="mb-4">No users found on the leaderboard yet.</p>
-          <p className="text-sm">Be the first to start betting!</p>
+      <div className="py-8 font-mono">
+        <SectionLabel>Leaderboard</SectionLabel>
+        <div className="py-12 text-center border border-dotted border-zinc-800 mt-4">
+          <p className="text-zinc-600 text-sm">No users found yet</p>
+          <p className="text-zinc-700 text-xs mt-2">Be the first to start betting</p>
         </div>
       </div>
     );
   }
-
-  const { first, second, third } = podiumPositions;
 
   // Handle period change - reset to page 1
   const handlePeriodChange = (newPeriod) => {
@@ -89,151 +75,108 @@ const LeaderboardPage = () => {
     setPage(1);
   };
 
-  return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold text-purple-900 dark:text-purple-300 mb-2">Leaderboard</h1>
-      <p className="text-gray-600 dark:text-gray-300 mb-4">Top biscuit holders across all HuskyBids users</p>
+  const periods = [
+    { id: 'all-time', label: 'All Time', key: 'A' },
+    { id: 'monthly', label: 'Month', key: 'M' },
+    { id: 'weekly', label: 'Week', key: 'W' },
+  ];
 
-      {/* Time Period Filter */}
-      <div className="mb-6">
-        <Tabs variant="pills" activeTab={period} onChange={handlePeriodChange}>
-          <Tabs.Tab id="all-time">All Time</Tabs.Tab>
-          <Tabs.Tab id="monthly">Monthly</Tabs.Tab>
-          <Tabs.Tab id="weekly">Weekly</Tabs.Tab>
-        </Tabs>
+  return (
+    <div className="py-8 space-y-8 font-mono">
+      {/* Header */}
+      <div>
+        <SectionLabel>Leaderboard</SectionLabel>
+        <p className="text-zinc-600 text-xs mt-2">Top biscuit holders</p>
       </div>
 
-      {/* Podium Section - Only show on page 1 */}
-      {page === 1 && leaderboard.length >= 3 && (
-        <Podium topThree={[first, second, third]} />
-      )}
+      {/* Time Period Filter */}
+      <div className="flex gap-2">
+        {periods.map((p) => (
+          <button
+            key={p.id}
+            onClick={() => handlePeriodChange(p.id)}
+            className={`flex items-center gap-2 px-3 py-2 text-xs border border-dotted transition-colors ${
+              period === p.id
+                ? 'border-zinc-600 text-zinc-300 bg-zinc-900/50'
+                : 'border-zinc-800 text-zinc-600 hover:border-zinc-700 hover:text-zinc-500'
+            }`}
+          >
+            <Kbd size="xs">{p.key}</Kbd>
+            {p.label}
+          </button>
+        ))}
+      </div>
 
-      {/* Rankings Table */}
-      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md dark:shadow-slate-900/50 overflow-hidden transition-all duration-300">
-        <table className="w-full">
-          <thead className="bg-purple-900 dark:bg-purple-800 text-white">
-            <tr>
-              <th className="px-6 py-3 text-left">Rank</th>
-              <th className="px-6 py-3 text-left">Username</th>
-              <th className="px-6 py-3 text-right">Biscuits</th>
-              <th className="px-6 py-3 text-right">Win Rate</th>
-              <th className="px-6 py-3 text-right">ROI</th>
-              <th className="px-6 py-3 text-right">Total Bets</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-slate-700">
-            {leaderboard.map((userData, index) => {
-              const isCurrentUser = user && userData._id?.toString() === user._id?.toString();
-              const isTopThree = page === 1 && index < 3;
+      <DottedDivider />
 
-              return (
-                <tr
-                  key={userData._id || index}
-                  className={`${
-                    isCurrentUser
-                      ? 'bg-purple-100 dark:bg-purple-900/30 font-semibold'
-                      : isTopThree
-                      ? 'bg-purple-50 dark:bg-purple-900/10'
-                      : 'hover:bg-gray-50 dark:hover:bg-slate-700'
-                  } text-gray-900 dark:text-gray-100 transition-colors`}
-                >
-                  <td className="px-6 py-4">
-                    <div className="flex items-center">
-                      {userData.rank}
-                      {isTopThree && (
-                        <span className="ml-2">
-                          {index === 0 ? '👑' : index === 1 ? '🥈' : '🥉'}
-                        </span>
-                      )}
-                      {isCurrentUser && <span className="ml-2 text-purple-600 dark:text-purple-400 font-bold">(You)</span>}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 font-medium">{userData.username}</td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end space-x-1">
-                      <BiscuitIcon size={16} />
-                      <span>{userData.biscuits.toLocaleString()}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <span
-                      className={
-                        userData.winRate >= 60
-                          ? 'text-green-600 dark:text-green-400 font-semibold'
-                          : userData.winRate >= 50
-                          ? 'text-yellow-600 dark:text-yellow-400'
-                          : 'text-red-600 dark:text-red-400'
-                      }
-                    >
-                      {userData.winRate}%
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <span
-                      className={
-                        userData.roi > 0
-                          ? 'text-green-600 dark:text-green-400 font-semibold'
-                          : userData.roi < 0
-                          ? 'text-red-600 dark:text-red-400'
-                          : 'text-gray-600 dark:text-gray-400'
-                      }
-                    >
-                      {userData.roi > 0 ? '+' : ''}{userData.roi}%
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">{userData.totalBets}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      {/* Rankings List */}
+      <div className="border border-dotted border-zinc-800">
+        {/* Header row */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-dotted border-zinc-800 text-[10px] text-zinc-600 uppercase tracking-wider">
+          <div className="flex items-center gap-4">
+            <span className="w-8">Rank</span>
+            <span>User</span>
+          </div>
+          <div className="flex items-center gap-6">
+            <span>Win %</span>
+            <span className="w-20 text-right">Balance</span>
+          </div>
+        </div>
+
+        {/* Leaderboard rows */}
+        {leaderboard.map((userData, index) => {
+          const isCurrentUser = user && userData._id?.toString() === user._id?.toString();
+          const rank = (page - 1) * itemsPerPage + index + 1;
+
+          return (
+            <LeaderboardRow
+              key={userData._id || index}
+              rank={rank}
+              username={userData.username}
+              balance={userData.biscuits}
+              winRate={userData.winRate}
+              isCurrentUser={isCurrentUser}
+            />
+          );
+        })}
       </div>
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="mt-6 flex items-center justify-between">
-          <div className="text-sm text-gray-600 dark:text-gray-300">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-zinc-600">
             Page {currentPage} of {totalPages}
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
+          </span>
+          <div className="flex items-center gap-2">
+            <button
               onClick={() => setPage(page - 1)}
               disabled={!hasPrevPage || loading}
+              className="flex items-center gap-1 px-3 py-2 border border-dotted border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronLeft className="w-4 h-4 mr-1" />
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
+              <Kbd size="xs">←</Kbd>
+              Prev
+            </button>
+            <button
               onClick={() => setPage(page + 1)}
               disabled={!hasNextPage || loading}
+              className="flex items-center gap-1 px-3 py-2 border border-dotted border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
               Next
-              <ChevronRight className="w-4 h-4 ml-1" />
-            </Button>
+              <Kbd size="xs">→</Kbd>
+            </button>
           </div>
         </div>
       )}
 
-      {/* Your Position (if not in top 10) */}
-      {userPositionInfo.showCustomPosition && (
-        <div className="mt-6 bg-purple-50 border-2 border-purple-200 rounded-lg p-4">
-          <p className="text-sm text-gray-600 mb-2">Your Position:</p>
-          <div className="flex items-center justify-between">
-            <span className="font-semibold text-purple-900">#{user.rank || '?'} {user.username}</span>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-1">
-                <BiscuitIcon size={16} />
-                <span className="font-semibold">{user.biscuits?.toLocaleString() || 0}</span>
-              </div>
-              <span className="text-sm text-gray-600">{user.totalBets || 0} bets</span>
-            </div>
-          </div>
-        </div>
-      )}
+      <DottedDivider />
+
+      {/* Actions */}
+      <ActionBar
+        actions={[
+          { key: 'D', label: 'Dashboard' },
+          { key: 'G', label: 'Games' },
+        ]}
+      />
     </div>
   );
 };

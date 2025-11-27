@@ -1,6 +1,6 @@
 'use client';
 
-import BiscuitIcon from '../Components/BiscuitIcon';
+import BiscuitIcon from '@components/BiscuitIcon';
 
 export default function Loading() {
   return (

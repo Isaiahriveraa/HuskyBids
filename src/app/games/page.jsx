@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Card, Button, Badge, LoadingSpinner } from '../Components/ui';
-import BiscuitIcon from '../Components/BiscuitIcon';
-import ErrorState from '../Components/ErrorState';
-import BettingModal from '../Components/BettingModal';
-import CardStyleC from '../Components/CardStyleC';
-import ErrorBoundary from '../Components/ErrorBoundary';
-import UWRecord from '../Components/UWRecord';
+import { Card, Button, Badge, LoadingSpinner } from '@components/ui';
+import BiscuitIcon from '@components/BiscuitIcon';
+import ErrorState from '@components/ErrorState';
+import BettingModal from '@components/BettingModal';
+import CardStyleC from '@components/CardStyleC';
+import ErrorBoundary from '@components/ErrorBoundary';
+import UWRecord from '@components/UWRecord';
 import { Calendar, MapPin, Trophy, Clock, TrendingUp } from 'lucide-react';
 import { useUserContext } from '../contexts/UserContext';
 

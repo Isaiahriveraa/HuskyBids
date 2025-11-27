@@ -2,14 +2,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { Card, Button, Badge, LoadingSpinner, Tabs } from '../Components/ui';
-import BiscuitIcon from '../Components/BiscuitIcon';
-import ErrorState from '../Components/ErrorState';
-import { formatDateTime } from '@/lib/date-utils';
-import { exportBettingHistoryToCSV } from '@/lib/export-utils';
-import BettingDistributionChart from '../Components/charts/BettingDistributionChart';
-import BettingTrendChart from '../Components/charts/BettingTrendChart';
-import SportActivityChart from '../Components/charts/SportActivityChart';
+import { Card, Button, Badge, LoadingSpinner, Tabs } from '@components/ui';
+import BiscuitIcon from '@components/BiscuitIcon';
+import ErrorState from '@components/ErrorState';
+import { formatDateTime } from '@shared/utils/date-utils';
+import { exportBettingHistoryToCSV } from '@shared/utils/export-utils';
+import BettingDistributionChart from '@components/charts/BettingDistributionChart';
+import BettingTrendChart from '@components/charts/BettingTrendChart';
+import SportActivityChart from '@components/charts/SportActivityChart';
 import {
   TrendingUp,
   TrendingDown,

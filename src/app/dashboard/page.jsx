@@ -4,22 +4,22 @@ import { useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { useUserContext } from '../contexts/UserContext';
 import { useUserStats } from '../hooks/useAPI';
-import BiscuitIcon from '../Components/BiscuitIcon';
-import ErrorBoundary from '../Components/ErrorBoundary';
-import ErrorState from '../Components/ErrorState';
-import { DashboardSkeleton, SkeletonCard } from '../Components/ui/LoadingSkeleton';
+import BiscuitIcon from '@components/BiscuitIcon';
+import ErrorBoundary from '@components/ErrorBoundary';
+import ErrorState from '@components/ErrorState';
+import { DashboardSkeleton, SkeletonCard } from '@components/ui/LoadingSkeleton';
 
 // Lazy load heavy components
-const GameCalendar = dynamic(() => import('../Components/GameCalendar'), {
+const GameCalendar = dynamic(() => import('@components/GameCalendar'), {
   loading: () => <SkeletonCard />,
   ssr: false,
 });
 
-const StatsGrid = dynamic(() => import('../Components/dashboard/StatsGrid'), {
+const StatsGrid = dynamic(() => import('@components/dashboard/StatsGrid'), {
   loading: () => <SkeletonCard />,
 });
 
-const BettingChart = dynamic(() => import('../Components/dashboard/BettingChart'), {
+const BettingChart = dynamic(() => import('@components/dashboard/BettingChart'), {
   loading: () => <SkeletonCard />,
   ssr: false,
 });

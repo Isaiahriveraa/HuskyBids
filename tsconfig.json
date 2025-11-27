@@ -25,6 +25,15 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@server/*": [
+        "./src/server/*"
+      ],
+      "@components/*": [
+        "./src/components/*"
+      ],
+      "@shared/*": [
+        "./src/shared/*"
       ]
     },
     "strictNullChecks": true

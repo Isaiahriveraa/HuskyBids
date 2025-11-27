@@ -4,13 +4,13 @@ import React, { useState, useEffect, useCallback } from "react";
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useUserContext } from '../contexts/UserContext';
-import BiscuitIcon from '../Components/BiscuitIcon';
-import ErrorBoundary from '../Components/ErrorBoundary';
+import BiscuitIcon from '@components/BiscuitIcon';
+import ErrorBoundary from '@components/ErrorBoundary';
 import { AlertCircle } from 'lucide-react';
-import { SkeletonCard } from '../Components/ui/LoadingSkeleton';
+import { SkeletonCard } from '@components/ui/LoadingSkeleton';
 
 // Lazy load EnhancedGameCard
-const EnhancedGameCard = dynamic(() => import('../Components/EnhancedGameCard'), {
+const EnhancedGameCard = dynamic(() => import('@components/EnhancedGameCard'), {
   loading: () => <SkeletonCard />,
 });
 

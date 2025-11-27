@@ -4,14 +4,14 @@ import React, { useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useUserContext } from '../contexts/UserContext';
 import { useLeaderboard } from '../hooks/useAPI';
-import BiscuitIcon from '../Components/BiscuitIcon';
-import ErrorState from '../Components/ErrorState';
-import { LeaderboardSkeleton, SkeletonCard } from '../Components/ui/LoadingSkeleton';
-import { Button, Tabs } from '../Components/ui';
+import BiscuitIcon from '@components/BiscuitIcon';
+import ErrorState from '@components/ErrorState';
+import { LeaderboardSkeleton, SkeletonCard } from '@components/ui/LoadingSkeleton';
+import { Button, Tabs } from '@components/ui';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Lazy load Podium component
-const Podium = dynamic(() => import('../Components/leaderboard/Podium'), {
+const Podium = dynamic(() => import('@components/leaderboard/Podium'), {
   loading: () => <SkeletonCard />,
   ssr: false,
 });

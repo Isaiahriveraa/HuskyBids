@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { Card, Button, Badge, LoadingSpinner } from '../Components/ui';
-import BiscuitIcon from '../Components/BiscuitIcon';
-import ErrorState from '../Components/ErrorState';
+import { Card, Button, Badge, LoadingSpinner } from '@components/ui';
+import BiscuitIcon from '@components/BiscuitIcon';
+import ErrorState from '@components/ErrorState';
 import { useUserContext } from '../contexts/UserContext';
 import {
   CheckCircle,

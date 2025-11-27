@@ -2,10 +2,10 @@
 
 import { usePathname } from 'next/navigation';
 import { useUserContext } from './contexts/UserContext';
-import Navbar from './Components/layout/Navbar';
-import RoutePreloader from './Components/RoutePreloader';
-import PageTransition from './Components/layout/PageTransition';
-import { Alert } from './Components/ui';
+import Navbar from '@components/layout/Navbar';
+import RoutePreloader from '@components/RoutePreloader';
+import PageTransition from '@components/layout/PageTransition';
+import { Alert } from '@components/ui';
 
 // Clean layout component with top navigation
 export default function SimpleLayout({ children }) {

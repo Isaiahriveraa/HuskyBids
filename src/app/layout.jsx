@@ -9,24 +9,40 @@ import SimpleLayout from './SimpleLayout';
 
 export default function RootLayout({ children }) {
   return (
-    <ClerkProvider>
-      <DarkModeProvider>
-        <AccessibilityProvider>
-          <UserProvider>
-            <html lang="en">
-              <head>
-                <title>HuskyBids</title>
-                <meta name="description" content="Bet on University of Washington sports games using biscuits!" />
-              </head>
-              <body>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <title>HuskyBids</title>
+        <meta name="description" content="Bet on University of Washington sports games using biscuits!" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const saved = localStorage.getItem('darkMode');
+                  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  const shouldBeDark = saved !== null ? saved === 'true' : prefersDark;
+                  if (shouldBeDark) {
+                    document.documentElement.classList.add('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body suppressHydrationWarning>
+        <ClerkProvider>
+          <DarkModeProvider>
+            <AccessibilityProvider>
+              <UserProvider>
                 <SimpleLayout>
                   {children}
                 </SimpleLayout>
-              </body>
-            </html>
-          </UserProvider>
-        </AccessibilityProvider>
-      </DarkModeProvider>
-    </ClerkProvider>
+              </UserProvider>
+            </AccessibilityProvider>
+          </DarkModeProvider>
+        </ClerkProvider>
+      </body>
+    </html>
   );
 }

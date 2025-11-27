@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
@@ -18,6 +18,66 @@ import {
 import BiscuitIcon from '../BiscuitIcon';
 import DarkModeToggle from './DarkModeToggle';
 
+// Stable UserButton wrapper with skeleton fallback
+function StableUserButton({ afterSignOutUrl, appearance, isMobile = false }) {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const size = isMobile ? 'w-10 h-10' : 'w-9 h-9';
+  const sizeNum = isMobile ? 40 : 36;
+
+  useEffect(() => {
+    // Wait for Clerk to fully load
+    const timer = setTimeout(() => setIsLoaded(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <div
+      style={{
+        width: `${sizeNum}px`,
+        height: `${sizeNum}px`,
+        position: 'relative',
+        flexShrink: 0
+      }}
+    >
+      {/* Skeleton placeholder - always rendered for stability */}
+      <div
+        className={`${size} rounded-full bg-gradient-to-br from-uw-purple to-purple-700 ring-2 ring-uw-purple-400`}
+        style={{
+          width: `${sizeNum}px`,
+          height: `${sizeNum}px`,
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          backgroundImage: 'linear-gradient(to bottom right, #4b2e83, #6b21a8)',
+          borderWidth: '2px',
+          borderStyle: 'solid',
+          borderColor: '#a78bfa',
+          opacity: isLoaded ? 0 : 1,
+          transition: 'opacity 200ms ease-in-out',
+          pointerEvents: 'none'
+        }}
+      />
+      {/* Actual UserButton */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: `${sizeNum}px`,
+          height: `${sizeNum}px`,
+          opacity: isLoaded ? 1 : 0,
+          transition: 'opacity 200ms ease-in-out'
+        }}
+      >
+        <UserButton
+          afterSignOutUrl={afterSignOutUrl}
+          appearance={appearance}
+        />
+      </div>
+    </div>
+  );
+}
+
 const navigationItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Place Bet', href: '/new-bid', icon: Calendar },
@@ -33,9 +93,16 @@ export default function Navbar({ biscuits = 0, loading = false }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <nav className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700 fixed w-full top-0 z-50 shadow-sm dark:shadow-lg dark:shadow-slate-900/50">
+    <nav
+      className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700 fixed w-full top-0 z-50 shadow-sm dark:shadow-lg dark:shadow-slate-900/50"
+      style={{
+        minHeight: '64px',
+        borderBottomWidth: '1px',
+        borderBottomStyle: 'solid'
+      }}
+    >
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-        <div className="flex justify-between items-center h-16 gap-2 md:gap-4">
+        <div className="flex justify-between items-center h-16 gap-2 md:gap-4" style={{ minHeight: '64px' }}>
           {/* Logo */}
           <Link href="/dashboard" className="flex items-center gap-3 group flex-shrink-0">
             <span className="text-xl md:text-2xl font-bold text-uw-purple dark:text-uw-purple-300 group-hover:text-purple-700 dark:group-hover:text-uw-purple-200 transition-colors whitespace-nowrap">
@@ -79,16 +146,26 @@ export default function Navbar({ biscuits = 0, loading = false }) {
             {user ? (
               <>
                 {/* Biscuits Display - Only for logged in users */}
-                <div className="bg-gradient-to-r from-uw-gold to-yellow-400 rounded-full px-3 py-1.5 md:px-4 md:py-2 shadow-md flex items-center gap-1.5 md:gap-2">
+                <div
+                  className="bg-gradient-to-r from-uw-gold to-yellow-400 rounded-full px-3 py-1.5 md:px-4 md:py-2 shadow-md flex items-center gap-1.5 md:gap-2"
+                  style={{
+                    backgroundImage: 'linear-gradient(to right, #b7791f, #facc15)',
+                    minWidth: '80px',
+                    minHeight: '32px'
+                  }}
+                >
                   <BiscuitIcon className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
-                  <span className="font-bold text-uw-purple text-sm md:text-base whitespace-nowrap">
+                  <span
+                    className="font-bold text-uw-purple text-sm md:text-base whitespace-nowrap"
+                    style={{ color: '#4b2e83' }}
+                  >
                     {loading ? '...' : biscuits.toLocaleString()}
                   </span>
                 </div>
 
                 {/* User Button (Clerk) - Desktop */}
                 <div className="hidden md:block flex-shrink-0">
-                  <UserButton
+                  <StableUserButton
                     afterSignOutUrl="/login"
                     appearance={{
                       elements: {
@@ -97,6 +174,7 @@ export default function Navbar({ biscuits = 0, loading = false }) {
                         userButtonPopoverActionButton: "hover:bg-uw-purple-50"
                       }
                     }}
+                    isMobile={false}
                   />
                 </div>
 
@@ -104,6 +182,7 @@ export default function Navbar({ biscuits = 0, loading = false }) {
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors flex-shrink-0"
+                  style={{ minWidth: '40px', minHeight: '40px' }}
                   aria-label="Toggle menu"
                 >
                   {mobileMenuOpen ? (
@@ -182,9 +261,16 @@ export default function Navbar({ biscuits = 0, loading = false }) {
                 })}
 
                 {/* User Profile in Mobile Menu */}
-                <div className="pt-4 mt-4 border-t border-gray-200 dark:border-slate-700 flex items-center justify-between">
+                <div
+                  className="pt-4 mt-4 border-t border-gray-200 dark:border-slate-700 flex items-center justify-between"
+                  style={{
+                    minHeight: '80px',
+                    borderTopWidth: '1px',
+                    borderTopStyle: 'solid'
+                  }}
+                >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <UserButton
+                    <StableUserButton
                       afterSignOutUrl="/login"
                       appearance={{
                         elements: {
@@ -193,6 +279,7 @@ export default function Navbar({ biscuits = 0, loading = false }) {
                           userButtonPopoverActionButton: "hover:bg-uw-purple-50 dark:hover:bg-slate-800"
                         }
                       }}
+                      isMobile={true}
                     />
                     <div className="min-w-0 flex-1">
                       <div className="font-semibold text-gray-900 dark:text-gray-50 truncate">

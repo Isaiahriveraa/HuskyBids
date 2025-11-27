@@ -1,35 +1,33 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 
 const DarkModeContext = createContext();
 
 export const DarkModeProvider = ({ children }) => {
-  // Initialize with system preference immediately (no flash)
+  // Initialize state to match what the inline script set (check the DOM)
+  // This prevents hydration mismatch by syncing with the pre-rendered state
   const [isDark, setIsDark] = useState(() => {
-    // Only runs on client
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('darkMode');
-      if (saved !== null) return saved === 'true';
-      return window.matchMedia('(prefers-color-scheme: dark)').matches;
-    }
-    return false;
+    // During SSR, return false (server doesn't have localStorage)
+    if (typeof window === 'undefined') return false;
+    // On client, check if dark class was already added by inline script
+    return document.documentElement.classList.contains('dark');
   });
-
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Apply immediately on mount
+  // Sync state with DOM on mount (handles edge cases)
   useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+    const hasDarkClass = document.documentElement.classList.contains('dark');
+    if (hasDarkClass !== isDark) {
+      setIsDark(hasDarkClass);
     }
     setIsLoaded(true);
   }, []);
 
-  // Update when toggled
+  // Handle dark mode changes after initial load
   useEffect(() => {
+    if (!isLoaded) return;
+
     if (isDark) {
       document.documentElement.classList.add('dark');
       localStorage.setItem('darkMode', 'true');
@@ -37,11 +35,11 @@ export const DarkModeProvider = ({ children }) => {
       document.documentElement.classList.remove('dark');
       localStorage.setItem('darkMode', 'false');
     }
-  }, [isDark]);
+  }, [isDark, isLoaded]);
 
-  const toggleDarkMode = () => {
+  const toggleDarkMode = useCallback(() => {
     setIsDark(prev => !prev);
-  };
+  }, []);
 
   return (
     <DarkModeContext.Provider value={{ isDark, toggleDarkMode, isLoaded }}>

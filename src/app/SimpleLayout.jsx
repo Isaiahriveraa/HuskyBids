@@ -14,14 +14,15 @@ export default function SimpleLayout({ children }) {
   // Get real user data from context
   const { user, loading: userLoading, dailyBonusMessage } = useUserContext();
 
-  // Don't show navbar on login/signup pages
+  // Don't show navbar on login/signup pages or experiments
   const hideNavbarPages = ['/login', '/sign-up'];
-  const showNavbar = !hideNavbarPages.includes(pathname);
+  const isExperimentPage = pathname?.startsWith('/experiments');
+  const showNavbar = !hideNavbarPages.includes(pathname) && !isExperimentPage;
 
   if (!showNavbar) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
-        <PageTransition>{children}</PageTransition>
+        {isExperimentPage ? children : <PageTransition>{children}</PageTransition>}
       </div>
     );
   }

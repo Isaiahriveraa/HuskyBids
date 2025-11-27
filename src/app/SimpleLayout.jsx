@@ -49,7 +49,7 @@ export default function SimpleLayout({ children }) {
           balance={biscuits}
           userName={userName}
         >
-          {children}
+          <PageTransition>{children}</PageTransition>
         </AppShell>
       </>
     );

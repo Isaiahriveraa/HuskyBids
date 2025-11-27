@@ -126,7 +126,7 @@ export default function TasksPage() {
         <StatCard
           label="Earned"
           value={summary?.earnedRewards || 0}
-          prefix="🍪 "
+          suffix=" pts"
           size="sm"
         />
       </div>
@@ -243,8 +243,8 @@ function TaskItem({ task, shortcut, onClaim, claiming }) {
         'flex items-center gap-1 text-sm tabular-nums',
         task.completed ? 'text-zinc-700' : 'text-zinc-400'
       )}>
-        <span>🍪</span>
-        <span>{task.reward}</span>
+        <span></span>
+        <span>{task.reward} pts</span>
       </div>
     </div>
   );

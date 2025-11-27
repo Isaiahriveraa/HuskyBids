@@ -12,6 +12,7 @@
   "dependencies": {
     "@clerk/clerk-react": "^4.30.0",
     "@clerk/nextjs": "^4.31.8",
+    "@phosphor-icons/react": "^2.1.10",
     "canvas-confetti": "^1.9.4",
     "dayjs": "^1.11.13",
     "framer-motion": "^12.23.24",

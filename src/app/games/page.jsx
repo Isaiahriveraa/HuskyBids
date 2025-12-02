@@ -38,6 +38,14 @@ export default function GamesPage() {
       if (!response.ok) throw new Error('Failed to fetch games');
 
       const data = await response.json();
+
+      // If no upcoming games found, automatically switch to past games
+      if (!showPastGames && data.games.length === 0) {
+        console.log('No upcoming games found, switching to past games view');
+        setShowPastGames(true);
+        return; // This will trigger a re-fetch with showPastGames=true
+      }
+
       setGames(data.games);
       setError(null);
     } catch (err) {
@@ -68,18 +76,30 @@ export default function GamesPage() {
     fetchGames();
   }, [fetchGames]);
 
-  const handleSync = useCallback(async (sportType) => {
+  const handleSync = useCallback(async () => {
     try {
       setSyncing(true);
       setError(null);
 
-      const response = await fetch(`/api/games/sync?sport=${sportType}`, { method: 'POST' });
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(errorData.error || `Failed to sync games`);
+      // Sync both football and basketball simultaneously
+      const [footballResponse, basketballResponse] = await Promise.all([
+        fetch('/api/games/sync?sport=football', { method: 'POST' }),
+        fetch('/api/games/sync?sport=basketball', { method: 'POST' })
+      ]);
+
+      // Check if both succeeded
+      if (!footballResponse.ok || !basketballResponse.ok) {
+        const fbError = !footballResponse.ok ? await footballResponse.json().catch(() => ({ error: 'Unknown error' })) : null;
+        const bbError = !basketballResponse.ok ? await basketballResponse.json().catch(() => ({ error: 'Unknown error' })) : null;
+
+        const errors = [];
+        if (fbError) errors.push(`Football: ${fbError.error}`);
+        if (bbError) errors.push(`Basketball: ${bbError.error}`);
+
+        throw new Error(errors.join(', '));
       }
 
-      const data = await response.json();
+      // Both synced successfully - now reload the games
       await fetchGames();
       // Silent success - no alert
     } catch (err) {
@@ -105,6 +125,38 @@ export default function GamesPage() {
     }
     fetchGames();
   }, [updateBiscuits, refreshUser, fetchGames]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      // Ignore if user is typing in an input
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      switch (e.key.toLowerCase()) {
+        case 'f':
+          setSport('football');
+          break;
+        case 'b':
+          setSport('basketball');
+          break;
+        case 'a':
+          setSport('all');
+          break;
+        case 'p':
+          setShowPastGames(prev => !prev);
+          break;
+        case 's':
+          // Trigger sync
+          if (!syncing) {
+            handleSync();
+          }
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [syncing, handleSync]);
 
   // Loading state
   if (loading) {
@@ -143,23 +195,15 @@ export default function GamesPage() {
           </p>
         </div>
         
-        {/* Sync buttons */}
-        <div className="flex gap-2">
-          <button
-            onClick={() => handleSync('football')}
-            disabled={syncing}
-            className="px-3 py-1.5 text-xs border border-dotted border-zinc-800 text-zinc-600 hover:text-zinc-400 hover:border-zinc-700 disabled:opacity-50 transition-colors"
-          >
-            {syncing ? '...' : 'Sync FB'}
-          </button>
-          <button
-            onClick={() => handleSync('basketball')}
-            disabled={syncing}
-            className="px-3 py-1.5 text-xs border border-dotted border-zinc-800 text-zinc-600 hover:text-zinc-400 hover:border-zinc-700 disabled:opacity-50 transition-colors"
-          >
-            {syncing ? '...' : 'Sync BB'}
-          </button>
-        </div>
+        {/* Sync button */}
+        <button
+          onClick={handleSync}
+          disabled={syncing}
+          className="flex items-center gap-2 px-3 py-1.5 text-xs border border-dotted border-zinc-800 text-zinc-600 hover:text-zinc-400 hover:border-zinc-700 disabled:opacity-50 transition-colors"
+        >
+          <Kbd size="xs">S</Kbd>
+          {syncing ? 'Syncing...' : 'Sync All'}
+        </button>
       </div>
 
       {/* Filters */}
@@ -234,7 +278,7 @@ export default function GamesPage() {
             <ErrorBoundary key={game._id}>
               <MinimalGameCard
                 game={game}
-                onPlaceBet={() => game.canBet && handlePlaceBet(game)}
+                onPlaceBet={() => handlePlaceBet(game)}
               />
             </ErrorBoundary>
           ))}

@@ -116,6 +116,8 @@ export default async function handler(req, res) {
           day: 'numeric',
           year: 'numeric',
         }),
+        // Completed games cannot be bet on
+        canBet: false,
       };
     });
 

@@ -1,7 +1,8 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useUserContext } from '../contexts/UserContext';
 import { useUserStats } from '../hooks/useAPI';
 import {
@@ -14,10 +15,34 @@ import {
 } from '@/components/experimental';
 
 export default function Dashboard() {
-  const { user, loading: userLoading } = useUserContext();
+  const router = useRouter();
+  const { loading: userLoading } = useUserContext();
   const { stats, isLoading, error } = useUserStats();
 
   const loading = isLoading || userLoading;
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      // Ignore if user is typing in an input
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      switch (e.key.toLowerCase()) {
+        case 'g':
+          router.push('/games');
+          break;
+        case 'n':
+          router.push('/new-bid');
+          break;
+        case 'b':
+          router.push('/betting-history');
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [router]);
 
   // Loading state - minimal skeleton
   if (loading) {

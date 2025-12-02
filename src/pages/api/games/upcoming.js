@@ -31,9 +31,11 @@ export default async function handler(req, res) {
       query.sport = sport;
     }
 
-    // Filter by status
+    // Filter by status and date
     if (includeCompleted === 'false') {
       query.status = { $in: ['scheduled', 'live', 'postponed'] };
+      // Only include games that haven't started yet or are currently live
+      query.gameDate = { $gte: new Date() };
     }
 
     // Fetch games
@@ -84,14 +86,23 @@ export default async function handler(req, res) {
     }
 
     // Add additional computed fields
-    const enrichedGames = games.map((game) => ({
-      ...game,
-      isUpcoming: new Date(game.gameDate) > new Date(),
-      daysUntil: Math.ceil(
-        (new Date(game.gameDate) - new Date()) / (1000 * 60 * 60 * 24)
-      ),
-      canBet: game.status === 'scheduled' && new Date(game.gameDate) > new Date(),
-    }));
+    const enrichedGames = games.map((game) => {
+      const now = new Date();
+      const gameTime = new Date(game.gameDate);
+
+      return {
+        ...game,
+        isUpcoming: gameTime > now,
+        daysUntil: Math.ceil((gameTime - now) / (1000 * 60 * 60 * 24)),
+        // Match the canBet logic from Game model virtual field
+        canBet: (
+          (game.bettingOpen !== false) && // Default true if not set
+          game.status === 'scheduled' &&
+          now < gameTime &&
+          (!game.bettingCloseTime || now < new Date(game.bettingCloseTime))
+        ),
+      };
+    });
 
     res.status(200).json({
       success: true,

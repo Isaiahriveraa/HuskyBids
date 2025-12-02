@@ -27,7 +27,7 @@ export const sidebarConfig = [
 
 // Keyboard shortcuts for global actions
 export const globalShortcuts = [
-  { key: 'N', action: 'new-bet', label: 'New bet' },
-  { key: '/', action: 'search', label: 'Search' },
-  { key: '?', action: 'help', label: 'Help' },
+  { key: 'N', label: 'New Bet', href: '/new-bid' },
+  // { key: '/', label: 'search', label: 'Search' }, 
+  // { key: '?', label: 'help', label: 'Help' },
 ];

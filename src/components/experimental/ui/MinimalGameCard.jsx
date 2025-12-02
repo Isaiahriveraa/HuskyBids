@@ -32,7 +32,7 @@ const statusLabels = {
   postponed: 'POSTPONED',
 };
 
-export default function MinimalGameCard({ 
+export default function MinimalGameCard({
   // Game object from API
   game,
   onPlaceBet,
@@ -50,6 +50,7 @@ export default function MinimalGameCard({
   winner, // 'home' | 'away' | null
   onBet,
   onClick,
+  selected = false,
   className = '',
 }) {
   // Extract data from game object if provided
@@ -80,11 +81,12 @@ export default function MinimalGameCard({
   };
 
   return (
-    <div 
+    <div
       onClick={onClick}
       className={cn(
-        'py-5 px-4 border border-dotted border-zinc-800 font-mono',
+        'py-5 px-4 border border-dotted font-mono',
         'hover:border-zinc-700 transition-colors',
+        selected ? 'border-zinc-600 bg-zinc-900/50' : 'border-zinc-800',
         onClick && 'cursor-pointer',
         className
       )}
@@ -166,8 +168,8 @@ export default function MinimalGameCard({
         </div>
       )}
 
-      {/* Odds & Bet Buttons */}
-      {canBet && displayHomeOdds && displayAwayOdds && (
+      {/* Odds & Bet Buttons - only show if not in selection mode */}
+      {canBet && displayHomeOdds && displayAwayOdds && !onClick && (
         <div className="flex gap-2 pt-3 border-t border-dotted border-zinc-900">
           <button
             onClick={(e) => {
@@ -187,6 +189,14 @@ export default function MinimalGameCard({
           >
             {displayTeam2.split(' ').pop()} <span className="text-zinc-600 ml-1">{displayAwayOdds.toFixed(2)}x</span>
           </button>
+        </div>
+      )}
+
+      {/* Odds display in selection mode */}
+      {canBet && displayHomeOdds && displayAwayOdds && onClick && (
+        <div className="flex gap-2 pt-3 border-t border-dotted border-zinc-900 justify-between text-xs text-zinc-600">
+          <span>{displayTeam1.split(' ').pop()} {displayHomeOdds.toFixed(2)}x</span>
+          <span>{displayTeam2.split(' ').pop()} {displayAwayOdds.toFixed(2)}x</span>
         </div>
       )}
 

@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useUserContext } from '@/app/contexts/UserContext';
 import { Modal, Button, Input, Badge, Alert } from './ui';
 import BiscuitIcon from './BiscuitIcon';
-import { TrendingUp, TrendingDown, AlertCircle, CheckCircle } from 'lucide-react';
-import { getTeamPositions, formatGameDateTime } from '@shared/utils/game-utils';
+import { TrendingUp, AlertCircle, CheckCircle } from 'lucide-react';
+import { getTeamPositions } from '@shared/utils/game-utils';
 import { BETTING_LIMITS, QUICK_BET_AMOUNTS, BETTING_ERRORS } from '@shared/constants/betting';
 
 export default function BettingModal({ game, isOpen, onClose, onBetPlaced }) {
@@ -106,9 +106,6 @@ export default function BettingModal({ game, isOpen, onClose, onBetPlaced }) {
     setSuccess(false);
     onClose();
   };
-
-  // Get team positions using utility
-  const { isUWHome, uwTeam, opponentTeam } = getTeamPositions(game);
 
   if (!game) return null;
 

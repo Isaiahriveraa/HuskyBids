@@ -11,11 +11,11 @@
  * </AppShell>
  */
 'use client';
-
 import Sidebar from './Sidebar';
 import MobileNav from './MobileNav';
 import Header from './Header';
 import PageContainer from './PageContainer';
+import useKeyboardNav from '@/hooks/useKeyboardNav';
 
 export default function AppShell({ 
   children,
@@ -26,6 +26,9 @@ export default function AppShell({
   showMobileNav = true,
   showHeader = true,
 }) {
+  //Enable global keyboard shortcuts
+  useKeyboardNav();
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white font-mono">
       {/* Desktop Sidebar */}

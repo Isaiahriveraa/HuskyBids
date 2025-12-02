@@ -1,96 +1,41 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useCallback } from "react";
-import dynamic from 'next/dynamic';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { useUserContext } from '../contexts/UserContext';
-import BiscuitIcon from '@components/BiscuitIcon';
+import {
+  SectionLabel,
+  DottedDivider,
+  BalanceDisplay,
+  MinimalGameCard,
+  ActionBar,
+} from '@/components/experimental';
 import ErrorBoundary from '@components/ErrorBoundary';
-import { AlertCircle } from 'lucide-react';
-import { SkeletonCard } from '@components/ui/LoadingSkeleton';
 
-// Lazy load EnhancedGameCard
-const EnhancedGameCard = dynamic(() => import('@components/EnhancedGameCard'), {
-  loading: () => <SkeletonCard />,
-});
-
-const NewBidPage = () => {
+export default function NewBidPage() {
   const { user, loading: userLoading, refreshUser, updateBiscuits } = useUserContext();
+
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedGame, setSelectedGame] = useState(null);
-  const [bidAmount, setBidAmount] = useState("");
-  const [prediction, setPrediction] = useState("home"); // 'home' or 'away'
-  const [syncing, setSyncing] = useState(false);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [retryCount, setRetryCount] = useState(0);
-  const [isFetching, setIsFetching] = useState(false);
+  const [bidAmount, setBidAmount] = useState('');
+  const [prediction, setPrediction] = useState('home');
 
-  const MAX_RETRIES = 3;
-  const BASE_DELAY = 1000; // 1 second
-
-  // Sync games from ESPN
-  const handleSync = useCallback(async (sport) => {
-    try {
-      console.log(`Starting sync for ${sport}...`);
-      setSyncing(true);
-      setError(null);
-
-      const response = await fetch(`/api/games/sync?sport=${sport}&force=true`, {
-        method: 'POST',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(errorData.error || `Failed to sync games (${response.status})`);
-      }
-
-      const data = await response.json();
-      console.log('Sync results:', data);
-
-      alert(`Sync completed!\nCreated: ${data.results.created}\nUpdated: ${data.results.updated}\nSkipped: ${data.results.skipped}${data.results.errors.length > 0 ? `\nErrors: ${data.results.errors.length}` : ''}`);
-
-      // Refresh games list after sync
-      setRefreshTrigger(prev => prev + 1);
-    } catch (err) {
-      console.error('Sync error:', err);
-      setError(`Sync failed: ${err.message}`);
-      alert(`Sync failed: ${err.message}`);
-    } finally {
-      setSyncing(false);
-      console.log('🏁 Sync complete, button re-enabled');
-    }
-  }, []);
-
-  // Fetch upcoming games with retry logic and rate limiting
+  // Fetch upcoming games
   useEffect(() => {
-    let timeoutId;
-    let mounted = true;
-
     async function fetchGames() {
-      // Prevent concurrent fetches
-      if (isFetching) {
-        console.log('[FETCH] Already fetching, skipping...');
-        return;
-      }
-
       try {
-        setIsFetching(true);
         setLoading(true);
         setError(null);
 
-        console.log(`[FETCH] Attempt ${retryCount + 1}/${MAX_RETRIES + 1}`);
-
-        const response = await fetch('/api/games/upcoming?sport=football');
+        const response = await fetch('/api/games/upcoming?sport=all&limit=20&includeCompleted=false');
 
         if (!response.ok) {
-          throw new Error(`Failed to fetch games: ${response.statusText}`);
+          throw new Error('Failed to fetch games');
         }
 
         const data = await response.json();
-
-        if (!mounted) return;
 
         if (data.success && data.games) {
           // Filter only games that are open for betting
@@ -98,71 +43,41 @@ const NewBidPage = () => {
             game.status === 'scheduled' && new Date(game.gameDate) > new Date()
           );
           setGames(bettableGames);
-          setRetryCount(0); // Reset retry count on success
         } else {
           throw new Error(data.error || 'Failed to load games');
         }
       } catch (err) {
-        console.error('[FETCH ERROR]', err);
-
-        if (!mounted) return;
-
-        // Implement exponential backoff retry
-        if (retryCount < MAX_RETRIES) {
-          const delay = BASE_DELAY * Math.pow(2, retryCount); // Exponential backoff
-          console.log(`[FETCH] Retrying in ${delay}ms... (attempt ${retryCount + 1}/${MAX_RETRIES})`);
-
-          timeoutId = setTimeout(() => {
-            setRetryCount(prev => prev + 1);
-            setRefreshTrigger(prev => prev + 1);
-          }, delay);
-        } else {
-          console.log('[FETCH] Max retries reached');
-          setError(`${err.message}. Please try again later.`);
-          setRetryCount(0); // Reset for next manual retry
-        }
+        console.error('Error fetching games:', err);
+        setError(err.message);
       } finally {
-        if (mounted) {
-          setLoading(false);
-          setIsFetching(false);
-        }
+        setLoading(false);
       }
     }
 
-    // Debounce rapid triggers (wait 300ms before fetching)
-    timeoutId = setTimeout(() => {
-      fetchGames();
-    }, 300);
-
-    return () => {
-      mounted = false;
-      if (timeoutId) clearTimeout(timeoutId);
-    };
-  }, [refreshTrigger, retryCount]);
+    fetchGames();
+  }, []);
 
   const calculatePotentialWinnings = useCallback(() => {
     if (!selectedGame || !bidAmount) return 0;
-    // Use the current odds from the game
     const odds = prediction === 'home' ? selectedGame.homeOdds : selectedGame.awayOdds;
     return Math.round(Number(bidAmount) * odds);
   }, [selectedGame, bidAmount, prediction]);
 
   const handlePlaceBid = useCallback(async () => {
     if (!selectedGame || !bidAmount) {
-      alert("Please select a game and enter bid amount");
+      alert('Please select a game and enter bid amount');
       return;
     }
 
     if (!user) {
-      alert("Please log in to place a bet");
+      alert('Please log in to place a bet');
       return;
     }
 
     const betAmountNum = Number(bidAmount);
 
-    // Validate bet amount
     if (betAmountNum < 10) {
-      alert("Minimum bet is 10 biscuits");
+      alert('Minimum bet is 10 biscuits');
       return;
     }
 
@@ -172,11 +87,10 @@ const NewBidPage = () => {
     }
 
     if (betAmountNum > 10000) {
-      alert("Maximum bet is 10,000 biscuits");
+      alert('Maximum bet is 10,000 biscuits');
       return;
     }
 
-    // Store original biscuit count for potential rollback
     const originalBiscuits = user.biscuits;
 
     try {
@@ -199,11 +113,8 @@ const NewBidPage = () => {
       }
 
       if (data.success) {
-        // PHASE 1: Optimistic UI update using API response
-        console.log('[BET] Optimistically updating biscuits from', originalBiscuits, 'to', data.user.biscuits);
         updateBiscuits(data.user.biscuits);
 
-        // Show success message
         const winnings = calculatePotentialWinnings();
         alert(`Bet placed successfully!
 Game: ${selectedGame.homeTeam} vs ${selectedGame.awayTeam}
@@ -213,28 +124,15 @@ Potential Winnings: ${winnings} Biscuits`);
 
         // Reset form
         setSelectedGame(null);
-        setBidAmount("");
-        setPrediction("home");
+        setBidAmount('');
+        setPrediction('home');
 
-        // Refresh games to show updated odds
-        setRefreshTrigger(prev => prev + 1);
-
-        // PHASE 1: Refresh user data from server to ensure sync
-        console.log('[BET] Refreshing user data from server...');
         await refreshUser();
-        console.log('[BET] User data refreshed successfully');
       }
     } catch (error) {
       console.error('Error placing bet:', error);
-
-      // PHASE 3: Error handling - Rollback optimistic update
-      console.log('[BET ERROR] Rolling back biscuits to', originalBiscuits);
       updateBiscuits(originalBiscuits);
-
-      // PHASE 3: Force refresh from server to get real state
-      console.log('[BET ERROR] Force refreshing from server...');
       await refreshUser();
-
       alert(`Failed to place bet: ${error.message}`);
     }
   }, [selectedGame, bidAmount, user, prediction, calculatePotentialWinnings, updateBiscuits, refreshUser]);
@@ -242,13 +140,13 @@ Potential Winnings: ${winnings} Biscuits`);
   // Loading state
   if (loading || userLoading) {
     return (
-      <div className="p-8">
-        <h1 className="text-3xl font-bold text-purple-900 mb-8">
-          Place a New Bid
-        </h1>
-        <div className="flex justify-center items-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-          <span className="ml-4 text-purple-900">Loading games...</span>
+      <div className="py-8 space-y-4 font-mono animate-pulse">
+        <div className="h-4 bg-zinc-900 rounded w-32" />
+        <div className="border-t border-dotted border-zinc-800" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-32 bg-zinc-900/50 border border-dotted border-zinc-800" />
+          ))}
         </div>
       </div>
     );
@@ -257,23 +155,15 @@ Potential Winnings: ${winnings} Biscuits`);
   // Error state
   if (error) {
     return (
-      <div className="p-8">
-        <h1 className="text-3xl font-bold text-purple-900 mb-8">
-          Place a New Bid
-        </h1>
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <AlertCircle className="w-5 h-5 text-red-600" />
-            <p className="text-red-600">{error}</p>
-          </div>
+      <div className="py-8 font-mono">
+        <SectionLabel>Error</SectionLabel>
+        <div className="mt-4 py-4 text-center border border-dotted border-zinc-800">
+          <p className="text-zinc-500 text-sm">{error}</p>
           <button
-            onClick={() => {
-              setError(null);
-              setRefreshTrigger(prev => prev + 1);
-            }}
-            className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+            onClick={() => window.location.reload()}
+            className="text-zinc-600 text-xs hover:text-zinc-400 underline mt-2"
           >
-            Retry
+            Try again
           </button>
         </div>
       </div>
@@ -281,73 +171,41 @@ Potential Winnings: ${winnings} Biscuits`);
   }
 
   return (
-    <div className="p-8">
-      {/* Header with Sync Buttons */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-        <h1 className="text-3xl font-bold text-purple-900">
-          Place a New Bid
-        </h1>
-        <div className="flex gap-2">
-          <button
-            onClick={() => handleSync('football')}
-            disabled={syncing}
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-          >
-            {syncing ? 'Syncing...' : 'Sync Football'}
-          </button>
-          <button
-            onClick={() => handleSync('basketball')}
-            disabled={syncing}
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-          >
-            {syncing ? 'Syncing...' : 'Sync Basketball'}
-          </button>
-        </div>
+    <div className="py-8 space-y-6 font-mono">
+      {/* Header */}
+      <div>
+        <SectionLabel>Place Bet</SectionLabel>
+        <p className="text-zinc-600 text-xs mt-1">Select a game and make your prediction</p>
       </div>
 
-      {/* User Balance - Only show when user data is loaded */}
-      {user && (
-        <div className="bg-gradient-to-r from-purple-500 to-purple-700 rounded-lg shadow-lg p-6 mb-8 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm opacity-90">Your Balance</p>
-              <div className="flex items-center gap-2 mt-1">
-                <BiscuitIcon className="w-8 h-8" />
-                <p className="text-3xl font-bold">{user.biscuits.toLocaleString()}</p>
-                <span className="text-lg opacity-90">Biscuits</span>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-sm opacity-90">Min Bet: 10</p>
-              <p className="text-sm opacity-90">Max Bet: 10,000</p>
-            </div>
-          </div>
-        </div>
-      )}
+      <DottedDivider />
+
+      {/* Balance */}
+      {user && <BalanceDisplay balance={user.biscuits} />}
+
+      <DottedDivider />
 
       {/* Game Selection */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4">Select Game</h2>
-
+      <div>
+        <SectionLabel className="mb-4">Select Game</SectionLabel>
         {games.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            <p className="mb-4">No upcoming games available for betting.</p>
-            <p className="text-sm">Check back later!</p>
+          <div className="py-8 text-center border border-dotted border-zinc-800">
+            <p className="text-zinc-600 text-sm">No upcoming games available</p>
+            <p className="text-zinc-700 text-xs mt-2">Check back later</p>
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {games.map((game) => (
-              <ErrorBoundary key={`error-${game._id}`}>
-                <EnhancedGameCard
-                  key={game._id}
-                  game={game}
-                  selected={selectedGame?._id === game._id}
+              <ErrorBoundary key={game._id}>
+                <div
                   onClick={() => setSelectedGame(game)}
-                  onPlaceBet={(data) => {
-                    // Refresh games list to show updated odds
-                    setRefreshTrigger(prev => prev + 1);
-                  }}
-                />
+                  className="cursor-pointer"
+                >
+                  <MinimalGameCard
+                    game={game}
+                    selected={selectedGame?._id === game._id}
+                  />
+                </div>
               </ErrorBoundary>
             ))}
           </div>
@@ -356,28 +214,26 @@ Potential Winnings: ${winnings} Biscuits`);
 
       {/* Bid Details */}
       {selectedGame && (
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">Bid Details</h2>
+        <>
+          <DottedDivider />
 
-          {/* Prediction Selection */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Who will win?
-            </label>
-            <div className="grid grid-cols-2 gap-4">
-              {/* Home Team Button */}
+          <div className="space-y-6">
+            <SectionLabel>Bet Details</SectionLabel>
+
+            {/* Team Selection */}
+            <div className="grid grid-cols-2 gap-3">
+              {/* Home Team */}
               <button
-                onClick={() => setPrediction("home")}
-                className={`p-4 rounded-lg border-2 transition-all ${
-                  prediction === "home"
-                    ? "border-purple-600 bg-purple-600 text-white shadow-lg"
-                    : "border-gray-200 bg-gray-50 text-gray-700 hover:border-purple-300 hover:bg-gray-100"
+                onClick={() => setPrediction('home')}
+                className={`p-4 border border-dotted transition-all ${
+                  prediction === 'home'
+                    ? 'border-zinc-600 bg-zinc-900/50'
+                    : 'border-zinc-800 hover:border-zinc-700'
                 }`}
               >
-                <div className="flex flex-col items-center justify-center">
-                  {/* Team Logo */}
+                <div className="flex flex-col items-center gap-2">
                   {selectedGame.homeTeamLogo && (
-                    <div className="relative w-16 h-16 mb-2">
+                    <div className="relative w-12 h-12">
                       <Image
                         src={selectedGame.homeTeamLogo}
                         alt={selectedGame.homeTeam}
@@ -387,32 +243,28 @@ Potential Winnings: ${winnings} Biscuits`);
                       />
                     </div>
                   )}
-                  {/* Team Name */}
-                  <div className="font-semibold text-lg text-center">
+                  <div className="text-xs text-zinc-400 text-center">
                     {selectedGame.homeTeam}
                   </div>
-                  {/* Home Badge */}
-                  <div className="text-xs mt-1 opacity-75">HOME</div>
-                  {/* Odds */}
-                  <div className="text-sm mt-1 opacity-90 font-bold">
+                  <div className="text-xs text-zinc-600">HOME</div>
+                  <div className="text-sm text-zinc-300 font-bold">
                     {selectedGame.homeOdds.toFixed(2)}x
                   </div>
                 </div>
               </button>
 
-              {/* Away Team Button */}
+              {/* Away Team */}
               <button
-                onClick={() => setPrediction("away")}
-                className={`p-4 rounded-lg border-2 transition-all ${
-                  prediction === "away"
-                    ? "border-purple-600 bg-purple-600 text-white shadow-lg"
-                    : "border-gray-200 bg-gray-50 text-gray-700 hover:border-purple-300 hover:bg-gray-100"
+                onClick={() => setPrediction('away')}
+                className={`p-4 border border-dotted transition-all ${
+                  prediction === 'away'
+                    ? 'border-zinc-600 bg-zinc-900/50'
+                    : 'border-zinc-800 hover:border-zinc-700'
                 }`}
               >
-                <div className="flex flex-col items-center justify-center">
-                  {/* Team Logo */}
+                <div className="flex flex-col items-center gap-2">
                   {selectedGame.awayTeamLogo && (
-                    <div className="relative w-16 h-16 mb-2">
+                    <div className="relative w-12 h-12">
                       <Image
                         src={selectedGame.awayTeamLogo}
                         alt={selectedGame.awayTeam}
@@ -422,89 +274,92 @@ Potential Winnings: ${winnings} Biscuits`);
                       />
                     </div>
                   )}
-                  {/* Team Name */}
-                  <div className="font-semibold text-lg text-center">
+                  <div className="text-xs text-zinc-400 text-center">
                     {selectedGame.awayTeam}
                   </div>
-                  {/* Away Badge */}
-                  <div className="text-xs mt-1 opacity-75">AWAY</div>
-                  {/* Odds */}
-                  <div className="text-sm mt-1 opacity-90 font-bold">
+                  <div className="text-xs text-zinc-600">AWAY</div>
+                  <div className="text-sm text-zinc-300 font-bold">
                     {selectedGame.awayOdds.toFixed(2)}x
                   </div>
                 </div>
               </button>
             </div>
-          </div>
 
-          {/* Bid Amount */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Bid Amount (Biscuits)
-            </label>
-            <input
-              type="number"
-              value={bidAmount}
-              onChange={(e) => setBidAmount(e.target.value)}
-              className="w-full p-2 border rounded focus:ring-purple-500 focus:border-purple-500"
-              placeholder="Enter amount"
-              min="1"
-            />
-          </div>
+            {/* Bid Amount Input */}
+            <div>
+              <label className="block text-xs text-zinc-600 mb-2">
+                Bet Amount (min: 10, max: 10,000)
+              </label>
+              <input
+                type="number"
+                value={bidAmount}
+                onChange={(e) => setBidAmount(e.target.value)}
+                className="w-full p-3 bg-zinc-950 border border-dotted border-zinc-800 text-zinc-300 text-sm focus:outline-none focus:border-zinc-600 font-mono"
+                placeholder="Enter amount"
+                min="10"
+                max="10000"
+              />
+            </div>
 
-          {/* Potential Winnings */}
-          <div className="mb-6 p-4 bg-purple-50 rounded-lg">
-            <div className="text-sm text-purple-700">Potential Winnings</div>
-            <div className="text-2xl font-bold text-purple-900">
-              {calculatePotentialWinnings()} Biscuits
+            {/* Potential Winnings */}
+            {bidAmount && (
+              <div className="p-4 border border-dotted border-zinc-800 bg-zinc-900/30">
+                <div className="text-xs text-zinc-600">Potential Winnings</div>
+                <div className="text-xl text-zinc-300 font-bold mt-1">
+                  {calculatePotentialWinnings()} Biscuits
+                </div>
+              </div>
+            )}
+
+            {/* Place Bet Button */}
+            <button
+              onClick={handlePlaceBid}
+              className="w-full py-3 border border-dotted border-zinc-800 text-zinc-400 hover:text-zinc-300 hover:border-zinc-600 transition-colors text-sm"
+            >
+              Place Bet
+            </button>
+
+            {/* Game Stats */}
+            <div className="grid grid-cols-2 gap-3 pt-4">
+              <div className="p-3 border border-dotted border-zinc-800">
+                <div className="text-xs text-zinc-600">Home Bets</div>
+                <div className="text-lg text-zinc-300 font-bold mt-1">
+                  {selectedGame.homeBets || 0}
+                </div>
+              </div>
+              <div className="p-3 border border-dotted border-zinc-800">
+                <div className="text-xs text-zinc-600">Away Bets</div>
+                <div className="text-lg text-zinc-300 font-bold mt-1">
+                  {selectedGame.awayBets || 0}
+                </div>
+              </div>
+              <div className="p-3 border border-dotted border-zinc-800">
+                <div className="text-xs text-zinc-600">Total Wagered</div>
+                <div className="text-lg text-zinc-300 font-bold mt-1">
+                  {(selectedGame.homeBiscuits + selectedGame.awayBiscuits).toLocaleString()}
+                </div>
+              </div>
+              <div className="p-3 border border-dotted border-zinc-800">
+                <div className="text-xs text-zinc-600">Location</div>
+                <div className="text-xs text-zinc-400 mt-1">
+                  {selectedGame.location || 'TBD'}
+                </div>
+              </div>
             </div>
           </div>
-
-          <button
-            onClick={handlePlaceBid}
-            className="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition-colors"
-          >
-            Place Bid
-          </button>
-        </div>
+        </>
       )}
 
-      {/* Game Information */}
-      {selectedGame && (
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold mb-4">
-            Game Information
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <div className="p-4 bg-purple-50 rounded-lg">
-              <div className="text-sm text-purple-700">Home Bets</div>
-              <div className="text-2xl font-bold text-purple-900">
-                {selectedGame.homeBets || 0}
-              </div>
-            </div>
-            <div className="p-4 bg-purple-50 rounded-lg">
-              <div className="text-sm text-purple-700">Away Bets</div>
-              <div className="text-2xl font-bold text-purple-900">
-                {selectedGame.awayBets || 0}
-              </div>
-            </div>
-            <div className="p-4 bg-purple-50 rounded-lg">
-              <div className="text-sm text-purple-700">Total Wagered</div>
-              <div className="text-2xl font-bold text-purple-900">
-                {(selectedGame.homeBiscuits + selectedGame.awayBiscuits).toLocaleString()}
-              </div>
-            </div>
-            <div className="p-4 bg-purple-50 rounded-lg">
-              <div className="text-sm text-purple-700">Location</div>
-              <div className="text-sm font-semibold text-purple-900 mt-2">
-                {selectedGame.location || 'TBD'}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <DottedDivider />
+
+      {/* Actions */}
+      <ActionBar
+        actions={[
+          { key: 'D', label: 'Dashboard' },
+          { key: 'G', label: 'Games' },
+          { key: 'B', label: 'All bets' },
+        ]}
+      />
     </div>
   );
-};
-
-export default NewBidPage;
+}

@@ -59,8 +59,27 @@ class BettingService {
         throw new Error(`Game is ${game.status} and not available for betting`);
       }
 
-      if (new Date(game.gameDate) <= new Date()) {
-        throw new Error('Betting is closed - game has already started');
+      // Use startTime first, fall back to gameDate (align with client-side useBetValidation)
+      const gameTimeValue = game.startTime || game.gameDate;
+      const gameDateTime = new Date(gameTimeValue);
+      const now = new Date();
+      
+      console.log('[BettingService] Date comparison debug:', {
+        gameId,
+        startTime: game.startTime,
+        gameDate: game.gameDate,
+        usedValue: gameTimeValue,
+        gameDateParsed: gameDateTime.toISOString(),
+        now: now.toISOString(),
+        gameTimestamp: gameDateTime.getTime(),
+        nowTimestamp: now.getTime(),
+        isGameInPast: gameDateTime < now,
+        differenceMs: gameDateTime.getTime() - now.getTime(),
+        differenceHours: ((gameDateTime.getTime() - now.getTime()) / (1000 * 60 * 60)).toFixed(2),
+      });
+
+      if (gameDateTime < now) {
+        throw new Error(`Betting is closed - game has already started (gameDate: ${gameDateTime.toISOString()}, now: ${now.toISOString()})`);
       }
 
       // 5. Calculate current odds BEFORE placing bet
@@ -73,7 +92,9 @@ class BettingService {
 
       const betOdds = predictedWinner === 'home' ? currentOdds.homeOdds : currentOdds.awayOdds;
 
-      // 6. Create bet (potentialWin calculated automatically by pre-save hook)
+      // 6. Create bet with potentialWin calculated upfront
+      const potentialWin = Math.round(betAmount * betOdds);
+
       const bet = new Bet({
         userId: user._id,
         clerkId: userId,
@@ -81,6 +102,7 @@ class BettingService {
         betAmount,
         predictedWinner,
         odds: betOdds,
+        potentialWin,
         status: 'pending',
       });
 

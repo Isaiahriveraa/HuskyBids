@@ -80,7 +80,6 @@ function StableUserButton({ afterSignOutUrl, appearance, isMobile = false }) {
 
 const navigationItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Place Bet', href: '/new-bid', icon: Calendar },
   { name: 'Games', href: '/games', icon: Gamepad2 },
   { name: 'Leaderboard', href: '/leaderboard', icon: Trophy },
   { name: 'My Bets', href: '/betting-history', icon: TrendingUp },

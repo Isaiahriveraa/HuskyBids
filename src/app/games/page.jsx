@@ -7,9 +7,10 @@ import {
   Kbd,
   ActionBar,
   MinimalGameCard,
+  MinimalBettingModal,
+  LoadingScreen,
 } from '@/components/experimental';
 import ErrorBoundary from '@components/ErrorBoundary';
-import BettingModal from '@components/BettingModal';
 import { useUserContext } from '../contexts/UserContext';
 
 export default function GamesPage() {
@@ -23,9 +24,11 @@ export default function GamesPage() {
   const [showPastGames, setShowPastGames] = useState(false);
   const [sortBy, setSortBy] = useState('recent');
 
-  // Betting modal state
-  const [selectedGame, setSelectedGame] = useState(null);
-  const [isBettingModalOpen, setIsBettingModalOpen] = useState(false);
+  // Betting modal state - combined to prevent race condition
+  const [bettingModal, setBettingModal] = useState({
+    isOpen: false,
+    game: null
+  });
 
   const fetchGames = useCallback(async () => {
     try {
@@ -114,8 +117,11 @@ export default function GamesPage() {
       // Could redirect to login
       return;
     }
-    setSelectedGame(game);
-    setIsBettingModalOpen(true);
+    // Atomic state update - eliminates race condition
+    setBettingModal({
+      isOpen: true,
+      game: game
+    });
   }, [userData]);
 
   const handleBetPlaced = useCallback((data) => {
@@ -160,22 +166,7 @@ export default function GamesPage() {
 
   // Loading state
   if (loading) {
-    return (
-      <div className="py-8 space-y-4 font-mono animate-pulse">
-        <div className="h-4 bg-zinc-900 rounded w-16" />
-        <div className="flex gap-2">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-8 w-24 bg-zinc-900 border border-dotted border-zinc-800" />
-          ))}
-        </div>
-        <div className="border-t border-dotted border-zinc-800" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-32 bg-zinc-900/50 border border-dotted border-zinc-800" />
-          ))}
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="games" />;
   }
 
   const sportFilters = [
@@ -273,15 +264,17 @@ export default function GamesPage() {
 
       {/* Games Grid */}
       {games.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {games.map((game) => (
-            <ErrorBoundary key={game._id}>
-              <MinimalGameCard
-                game={game}
-                onPlaceBet={() => handlePlaceBet(game)}
-              />
-            </ErrorBoundary>
-          ))}
+        <div className="max-h-[calc(100vh-20rem)] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {games.map((game) => (
+              <ErrorBoundary key={game._id}>
+                <MinimalGameCard
+                  game={game}
+                  onPlaceBet={() => handlePlaceBet(game)}
+                />
+              </ErrorBoundary>
+            ))}
+          </div>
         </div>
       )}
 
@@ -296,14 +289,13 @@ export default function GamesPage() {
       />
 
       {/* Betting Modal */}
-      {selectedGame && (
+      {bettingModal.game && (
         <ErrorBoundary>
-          <BettingModal
-            game={selectedGame}
-            isOpen={isBettingModalOpen}
+          <MinimalBettingModal
+            game={bettingModal.game}
+            isOpen={bettingModal.isOpen}
             onClose={() => {
-              setIsBettingModalOpen(false);
-              setSelectedGame(null);
+              setBettingModal({ isOpen: false, game: null });
             }}
             onBetPlaced={handleBetPlaced}
           />

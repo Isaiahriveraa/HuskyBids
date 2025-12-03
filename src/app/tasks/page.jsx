@@ -7,6 +7,7 @@ import {
   DottedDivider,
   Kbd,
   StatCard,
+  LoadingScreen,
 } from '@/components/experimental';
 import { useUserContext } from '../contexts/UserContext';
 import { cn } from '@/shared/utils';
@@ -82,22 +83,7 @@ export default function TasksPage() {
 
   // Loading state
   if (!isLoaded || loading) {
-    return (
-      <div className="py-8 space-y-4 font-mono animate-pulse">
-        <div className="h-4 bg-zinc-900 rounded w-16" />
-        <div className="grid grid-cols-3 gap-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 bg-zinc-900/50 border border-dotted border-zinc-800" />
-          ))}
-        </div>
-        <div className="border-t border-dotted border-zinc-800" />
-        <div className="space-y-2">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 bg-zinc-900/50 border border-dotted border-zinc-800" />
-          ))}
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="tasks" />;
   }
 
   return (

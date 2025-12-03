@@ -136,6 +136,7 @@ module.exports = {
         'spin-slow': 'spin 3s linear infinite',
         'wiggle': 'wiggle 1s ease-in-out infinite',
         'confetti': 'confetti 1s ease-out forwards',
+        'letter-chase': 'letter-chase 2.7s ease-in-out infinite',
       },
       
       // Keyframes
@@ -183,13 +184,27 @@ module.exports = {
           '50%': { transform: 'rotate(3deg)' },
         },
         'confetti': {
-          '0%': { 
+          '0%': {
             transform: 'translateY(0) rotateZ(0deg)',
             opacity: '1',
           },
-          '100%': { 
+          '100%': {
             transform: 'translateY(1000px) rotateZ(720deg)',
             opacity: '0',
+          },
+        },
+        'letter-chase': {
+          '0%, 15%': {
+            transform: 'scale(1)',
+            opacity: '0.4',
+          },
+          '7.5%': {
+            transform: 'scale(1.15)',
+            opacity: '1',
+          },
+          '100%': {
+            transform: 'scale(1)',
+            opacity: '0.4',
           },
         },
       },

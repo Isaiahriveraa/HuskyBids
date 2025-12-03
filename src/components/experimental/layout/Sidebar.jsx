@@ -11,7 +11,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { sidebarConfig } from '../config/navigation';
 import NavLink from '../ui/NavLink';
-import ActionButton from '../ui/ActionButton';
 
 export default function Sidebar({ 
   items = sidebarConfig,
@@ -48,18 +47,6 @@ export default function Sidebar({
           );
         })}
       </nav>
-
-      {/* New Bet shortcut */}
-      <div className="p-4 border-t border-dotted border-zinc-800">
-        <ActionButton 
-          href="/new-bid"
-          shortcut="N"
-          variant="default"
-          className="w-full"
-        >
-          New bet
-        </ActionButton>
-      </div>
 
       {/* User - minimal */}
       <div className="p-6 border-t border-dotted border-zinc-800">

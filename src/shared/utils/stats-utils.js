@@ -38,15 +38,6 @@ export function calculateROI(totalWon, totalLost, totalWagered, precision = 2) {
 }
 
 /**
- * Gets today's date at midnight (for date comparisons)
- * @returns {Date} Today's date at 00:00:00
- */
-export function getToday() {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-}
-
-/**
  * Calculates profit/loss
  * @param {number} totalWon - Total biscuits won
  * @param {number} totalLost - Total biscuits lost
@@ -101,36 +92,6 @@ export function getBettingTier(totalBets) {
   if (totalBets >= 50) return { name: 'Veteran', icon: '🎯', color: 'green' };
   if (totalBets >= 10) return { name: 'Regular', icon: '📈', color: 'teal' };
   return { name: 'Rookie', icon: '🌱', color: 'gray' };
-}
-
-/**
- * Checks if a date is today
- * @param {Date|string} date - Date to check
- * @returns {boolean} True if date is today
- */
-export function isToday(date) {
-  const today = getToday();
-  const checkDate = new Date(date);
-  checkDate.setHours(0, 0, 0, 0);
-
-  return checkDate.getTime() === today.getTime();
-}
-
-/**
- * Gets days between two dates
- * @param {Date|string} date1 - First date
- * @param {Date|string} date2 - Second date
- * @returns {number} Days between dates
- */
-export function getDaysBetween(date1, date2) {
-  const d1 = new Date(date1);
-  const d2 = new Date(date2);
-
-  d1.setHours(0, 0, 0, 0);
-  d2.setHours(0, 0, 0, 0);
-
-  const diffTime = Math.abs(d2 - d1);
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 }
 
 /**

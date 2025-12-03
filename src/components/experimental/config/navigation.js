@@ -12,7 +12,6 @@
 export const navConfig = [
   { key: 'H', label: 'Home', href: '/dashboard' },
   { key: 'G', label: 'Games', href: '/games' },
-  { key: 'N', label: 'Bet', href: '/new-bid', isMain: true },
   { key: 'L', label: 'Rank', href: '/leaderboard' },
   { key: 'B', label: 'Bets', href: '/betting-history' },
 ];
@@ -27,7 +26,6 @@ export const sidebarConfig = [
 
 // Keyboard shortcuts for global actions
 export const globalShortcuts = [
-  { key: 'N', label: 'New Bet', href: '/new-bid' },
-  // { key: '/', label: 'search', label: 'Search' }, 
+  // { key: '/', label: 'search', label: 'Search' },
   // { key: '?', label: 'help', label: 'Help' },
 ];

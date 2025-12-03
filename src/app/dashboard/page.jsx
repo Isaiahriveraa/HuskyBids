@@ -12,6 +12,7 @@ import {
   StatCard,
   BetHistoryRow,
   ActionBar,
+  LoadingScreen,
 } from '@/components/experimental';
 
 export default function Dashboard() {
@@ -31,9 +32,6 @@ export default function Dashboard() {
         case 'g':
           router.push('/games');
           break;
-        case 'n':
-          router.push('/new-bid');
-          break;
         case 'b':
           router.push('/betting-history');
           break;
@@ -44,19 +42,9 @@ export default function Dashboard() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [router]);
 
-  // Loading state - minimal skeleton
+  // Loading state
   if (loading) {
-    return (
-      <div className="py-8 space-y-6 font-mono animate-pulse">
-        <div className="h-12 bg-zinc-900 rounded w-32" />
-        <div className="border-t border-dotted border-zinc-800" />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-24 bg-zinc-900 border border-dotted border-zinc-800" />
-          ))}
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="stats" />;
   }
 
   // Error state

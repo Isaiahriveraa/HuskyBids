@@ -10,6 +10,7 @@ import {
   BetHistoryRow,
   Kbd,
   ActionBar,
+  LoadingScreen,
 } from '@/components/experimental';
 import { formatDateTime } from '@shared/utils/date-utils';
 
@@ -56,20 +57,7 @@ export default function BettingHistoryPage() {
 
   // Loading state
   if (!isLoaded || loading) {
-    return (
-      <div className="py-8 space-y-4 font-mono animate-pulse">
-        <div className="h-4 bg-zinc-900 rounded w-24" />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-20 bg-zinc-900 border border-dotted border-zinc-800" />
-          ))}
-        </div>
-        <div className="border-t border-dotted border-zinc-800" />
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="h-16 bg-zinc-900/50" />
-        ))}
-      </div>
-    );
+    return <LoadingScreen message="history" />;
   }
 
   // Auth error

@@ -56,7 +56,7 @@ export default function GamesDropdown({ className = '' }) {
         <Dropdown.Header className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
           <span className="text-base font-bold text-uw-purple-900">Upcoming Games</span>
           <Link
-            href="/new-bid"
+            href="/games"
             className="text-xs text-uw-purple-600 hover:text-uw-purple-700 font-medium hover:underline"
           >
             View All
@@ -90,7 +90,7 @@ export default function GamesDropdown({ className = '' }) {
             {games.map((game, index) => (
               <Link
                 key={game._id || index}
-                href="/new-bid"
+                href="/games"
                 className="block hover:bg-gray-50 transition-colors"
               >
                 <div className="px-4 py-3 border-b border-gray-100 last:border-b-0">

@@ -67,9 +67,10 @@ export const BETTING_ERRORS = {
   MIN_BET_NOT_MET: (min) => `Minimum bet is ${min} biscuits`,
   MAX_BET_EXCEEDED: (max) => `Maximum bet is ${max} biscuits`,
   INVALID_AMOUNT: 'Please enter a valid bet amount',
+  NOT_INTEGER: 'Bet must be a whole number',
   NO_TEAM_SELECTED: 'Please select a team',
   GAME_NOT_FOUND: 'Game not found',
   BETTING_CLOSED: 'Betting is closed for this game',
-  GAME_ALREADY_STARTED: 'Game has already started',
+  GAME_ALREADY_STARTED: 'Betting is closed - game has already started',
   GAME_NOT_SCHEDULED: 'Game is not available for betting',
 };

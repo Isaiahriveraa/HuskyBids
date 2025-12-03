@@ -16,7 +16,7 @@ export default function RoutePreloader() {
       // Frequently visited pages
       const routesToPreload = [
         '/dashboard',
-        '/new-bid',
+        '/games',
         '/leaderboard',
         '/betting-history',
         '/tasks',

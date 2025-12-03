@@ -9,6 +9,7 @@ import {
   LeaderboardRow,
   Kbd,
   ActionBar,
+  LoadingScreen,
 } from '@/components/experimental';
 
 const LeaderboardPage = () => {
@@ -27,17 +28,9 @@ const LeaderboardPage = () => {
     currentPage
   } = useLeaderboard(itemsPerPage, period, page);
 
-  // Loading state - minimal skeleton
+  // Loading state
   if (loading) {
-    return (
-      <div className="py-8 space-y-4 font-mono animate-pulse">
-        <div className="h-4 bg-zinc-900 rounded w-24" />
-        <div className="border-t border-dotted border-zinc-800" />
-        {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="h-12 bg-zinc-900/50" />
-        ))}
-      </div>
-    );
+    return <LoadingScreen message="leaderboard" />;
   }
 
   // Error state

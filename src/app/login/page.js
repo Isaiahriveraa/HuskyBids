@@ -2,13 +2,12 @@
 
 import { SignIn } from '@clerk/nextjs';
 import { useSearchParams } from 'next/navigation';
-import Image from 'next/image';
-import { Gamepad2 } from 'lucide-react';
+import Link from 'next/link';
 
 /**
  * Login Page
  * Uses Clerk's pre-built SignIn component for authentication
- * 
+ *
  * Note: Middleware handles redirects for authenticated users
  * This page only renders when user is NOT authenticated
  */
@@ -17,44 +16,49 @@ export default function LoginPage() {
   const redirectUrl = searchParams.get('redirect') || '/dashboard';
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-uw-purple-50 via-gray-50 to-uw-gold-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <Image
-            src="/images/logo.png"
-            alt="UW Huskies Logo"
-            width={64}
-            height={64}
-            className="mx-auto mb-3"
-          />
-          <h1 className="text-4xl font-extrabold text-uw-purple-900 mb-2">
+    <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4 py-12 font-mono">
+      <div className="w-full max-w-md space-y-8">
+        {/* Minimal header */}
+        <header className="text-center mb-8">
+          <h1 className="text-sm tracking-[0.3em] uppercase text-zinc-400 mb-2">
             HuskyBids
           </h1>
-          <p className="text-lg text-gray-700 font-semibold mb-1">
-            Welcome Back!
+          <p className="text-xs text-zinc-600">
+            Log in to your account
           </p>
-          <p className="text-sm text-gray-600">
-            Sign in to start betting on UW games
-          </p>
-        </div>
+        </header>
 
-        {/* Clerk SignIn Component */}
-        <div className="mt-8">
+        {/* Clerk SignIn Component with minimal styling */}
+        <div>
           <SignIn
             appearance={{
+              variables: {
+                colorPrimary: '#71717a',
+                colorText: '#d4d4d8',
+                colorTextSecondary: '#71717a',
+                colorBackground: '#18181b',
+                colorInputBackground: '#27272a',
+                colorInputText: '#d4d4d8',
+                fontFamily: 'ui-monospace, monospace',
+                fontSize: '14px',
+                borderRadius: '0px',
+              },
               elements: {
-                rootBox: "mx-auto",
-                card: "shadow-2xl rounded-xl border border-gray-200",
-                headerTitle: "text-uw-purple-900",
-                headerSubtitle: "text-gray-600",
-                socialButtonsBlockButton: "border-gray-300 hover:bg-gray-50",
-                formButtonPrimary: "bg-uw-purple-600 hover:bg-uw-purple-700",
-                footerActionLink: "text-uw-purple-600 hover:text-uw-purple-700",
+                rootBox: 'mx-auto',
+                card: 'bg-zinc-900 border border-dotted border-zinc-800 shadow-none',
+                headerTitle: 'text-zinc-300 text-sm font-mono',
+                headerSubtitle: 'text-zinc-600 text-xs font-mono',
+                formFieldInput: 'bg-zinc-800 border border-dotted border-zinc-700 text-zinc-300 font-mono text-sm focus:border-zinc-500 rounded-none',
+                formFieldLabel: 'text-zinc-500 text-xs font-mono uppercase tracking-wider',
+                formButtonPrimary: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-dotted border-zinc-700 font-mono text-sm shadow-none rounded-none',
+                footerActionLink: 'text-zinc-500 hover:text-zinc-400 font-mono text-xs',
+                socialButtonsBlockButton: 'border border-dotted border-zinc-700 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 font-mono text-sm rounded-none shadow-none',
+                dividerLine: 'bg-zinc-800',
+                dividerText: 'text-zinc-600 font-mono text-xs',
               },
               layout: {
-                socialButtonsPlacement: "bottom",
-                socialButtonsVariant: "iconButton",
+                socialButtonsPlacement: 'bottom',
+                socialButtonsVariant: 'iconButton',
               }
             }}
             routing="hash"
@@ -64,29 +68,13 @@ export default function LoginPage() {
           />
         </div>
 
-        {/* Footer */}
-        <div className="text-center text-sm text-gray-600 mt-6">
-          <p>
-            Don't have an account?{' '}
-            <a href="/sign-up" className="font-semibold text-uw-purple-600 hover:text-uw-purple-700">
-              Sign up here
-            </a>
-          </p>
-        </div>
-
-        {/* Info Box */}
-        <div className="mt-8 bg-white rounded-lg shadow-md p-6 border border-gray-200">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center justify-center">
-            <Gamepad2 className="w-5 h-5 text-uw-purple-600 inline-block mr-2" />
-            What is HuskyBids?
-          </h3>
-          <ul className="text-xs text-gray-600 space-y-2">
-            <li>• Bet virtual biscuits on UW sports games</li>
-            <li>• Compete on the leaderboard</li>
-            <li>• Track your betting history</li>
-            <li>• Win daily rewards and bonuses</li>
-          </ul>
-        </div>
+        {/* Footer link */}
+        <p className="text-center text-xs text-zinc-600 font-mono mt-6">
+          No account?{' '}
+          <Link href="/sign-up" className="text-zinc-500 hover:text-zinc-400 underline">
+            Sign up
+          </Link>
+        </p>
       </div>
     </div>
   );

@@ -66,7 +66,7 @@ export default function BettingHistoryPage() {
       <div className="py-8 font-mono">
         <SectionLabel>Error</SectionLabel>
         <p className="text-zinc-500 text-sm mt-2">Authentication required</p>
-        <Link href="/login" className="mt-4 text-xs text-zinc-600 hover:text-zinc-400 underline">
+        <Link href="/sign-up" className="mt-4 text-xs text-zinc-600 hover:text-zinc-400 underline">
           Sign in
         </Link>
       </div>

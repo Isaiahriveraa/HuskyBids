@@ -19,7 +19,7 @@ import { Alert } from '@components/ui';
  */
 export default function SimpleLayout({ children }) {
   const pathname = usePathname();
-  const { user, loading: userLoading, dailyBonusMessage } = useUserContext();
+  const { user, loading: userLoading, dailyBonusMessage, settlementMessage } = useUserContext();
 
   // Don't show navbar on login/signup pages
   const hideNavbarPages = ['/login', '/sign-up'];
@@ -44,6 +44,22 @@ export default function SimpleLayout({ children }) {
     return (
       <>
         <RoutePreloader />
+        {/* Settlement notification */}
+        {settlementMessage && (
+          <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
+            <Alert variant={settlementMessage.includes('+') ? 'success' : settlementMessage.includes('-') ? 'error' : 'info'} className="shadow-lg font-mono">
+              {settlementMessage}
+            </Alert>
+          </div>
+        )}
+        {/* Daily bonus notification */}
+        {dailyBonusMessage && (
+          <div className="fixed top-20 right-4 z-50 animate-slide-in-right">
+            <Alert variant="success" className="shadow-lg font-mono">
+              {dailyBonusMessage}
+            </Alert>
+          </div>
+        )}
         <AppShell
           title="HuskyBids"
           balance={biscuits}
@@ -69,9 +85,19 @@ export default function SimpleLayout({ children }) {
       <RoutePreloader />
       <Navbar biscuits={biscuits} loading={userLoading} />
 
-      {dailyBonusMessage && (
+      {/* Settlement notification */}
+      {settlementMessage && (
         <div className="fixed top-20 right-4 z-50 animate-slide-in-right">
-          <Alert variant="success" className="shadow-lg">
+          <Alert variant={settlementMessage.includes('+') ? 'success' : settlementMessage.includes('-') ? 'error' : 'info'} className="shadow-lg font-mono">
+            {settlementMessage}
+          </Alert>
+        </div>
+      )}
+
+      {/* Daily bonus notification - offset if settlement exists */}
+      {dailyBonusMessage && (
+        <div className={`fixed right-4 z-50 animate-slide-in-right ${settlementMessage ? 'top-36' : 'top-20'}`}>
+          <Alert variant="success" className="shadow-lg font-mono">
             {dailyBonusMessage}
           </Alert>
         </div>

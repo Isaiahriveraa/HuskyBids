@@ -1,17 +1,16 @@
 'use client';
 
 import { SignUp } from '@clerk/nextjs';
-import Link from 'next/link';
+import AuthPageWrapper from '@/components/auth/AuthPageWrapper';
 
 /**
  * Sign Up Page
  * Uses Clerk's pre-built SignUp component for user registration
- *
- * Note: Middleware handles redirects for authenticated users
- * This page only renders when user is NOT authenticated
+ * Wrapped with AuthPageWrapper to prevent flash during redirect
  */
 export default function SignUpPage() {
   return (
+    <AuthPageWrapper>
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4 py-12 font-mono">
       <div className="w-full max-w-md space-y-8">
         {/* Minimal header */}
@@ -60,18 +59,10 @@ export default function SignUpPage() {
             routing="hash"
             path="/sign-up"
             afterSignUpUrl="/dashboard"
-            signInUrl="/login"
           />
         </div>
-
-        {/* Footer link */}
-        <p className="text-center text-xs text-zinc-600 font-mono mt-6">
-          Have an account?{' '}
-          <Link href="/login" className="text-zinc-500 hover:text-zinc-400 underline">
-            Log in
-          </Link>
-        </p>
       </div>
     </div>
+    </AuthPageWrapper>
   );
 }

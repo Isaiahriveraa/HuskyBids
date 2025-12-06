@@ -12,8 +12,9 @@ export function UserProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [dailyBonusMessage, setDailyBonusMessage] = useState(null);
+  const [settlementMessage, setSettlementMessage] = useState(null);
 
-  // Fetch user data from MongoDB (also handles daily bonus)
+  // Fetch user data from MongoDB (also handles daily bonus and bet settlement)
   const fetchUserData = async () => {
     console.log('[UserContext] fetchUserData called', { userId, clerkLoaded, isSignedIn });
 
@@ -28,8 +29,62 @@ export function UserProvider({ children }) {
       setLoading(true);
       setError(null);
 
-      console.log('[UserContext] Syncing user (checking for daily bonus)...');
-      // Use sync-user which handles user creation AND daily bonus
+      // STEP 1: Sync games from ESPN to get latest scores and statuses
+      console.log('[UserContext] 🔄 Syncing games from ESPN...');
+      try {
+        // Sync both football and basketball games in parallel
+        await Promise.all([
+          fetch('/api/games/sync-from-espn?sport=football', { method: 'POST' })
+            .then(res => res.ok ? console.log('[UserContext] ✅ Football games synced') : console.warn('[UserContext] ⚠️  Football sync failed'))
+            .catch(err => console.warn('[UserContext] ⚠️  Football sync error:', err.message)),
+          fetch('/api/games/sync-from-espn?sport=basketball', { method: 'POST' })
+            .then(res => res.ok ? console.log('[UserContext] ✅ Basketball games synced') : console.warn('[UserContext] ⚠️  Basketball sync failed'))
+            .catch(err => console.warn('[UserContext] ⚠️  Basketball sync error:', err.message)),
+        ]);
+      } catch (syncError) {
+        // Don't fail login if game sync fails - just log it
+        console.warn('[UserContext] ⚠️  Game sync error (non-critical):', syncError.message);
+      }
+
+      // STEP 2: Auto-settle user's pending bets based on completed games
+      console.log('[UserContext] 💰 Auto-settling pending bets...');
+      try {
+        const settleResponse = await fetch('/api/bets/auto-settle-user', {
+          method: 'POST',
+        });
+
+        if (settleResponse.ok) {
+          const settleData = await settleResponse.json();
+          console.log('[UserContext] Settlement result:', {
+            settled: settleData.settled,
+            won: settleData.won,
+            lost: settleData.lost,
+            netChange: settleData.netChange,
+          });
+
+          // Show settlement notification if bets were settled
+          if (settleData.settled > 0) {
+            const netChange = settleData.netChange || 0;
+            const sign = netChange > 0 ? '+' : '';
+            const message = `${settleData.settled} bet${settleData.settled > 1 ? 's' : ''} settled: ${sign}${netChange} pts`;
+            setSettlementMessage(message);
+            console.log('[UserContext]', message);
+
+            // Clear message after 8 seconds
+            setTimeout(() => {
+              setSettlementMessage(null);
+            }, 8000);
+          }
+        } else {
+          console.warn('[UserContext] ⚠️  Bet settlement failed (non-critical)');
+        }
+      } catch (settleError) {
+        // Don't fail login if settlement fails - just log it
+        console.warn('[UserContext] ⚠️  Bet settlement error (non-critical):', settleError.message);
+      }
+
+      // STEP 3: Sync user data (handles user creation and daily bonus)
+      console.log('[UserContext] 👤 Syncing user data...');
       const response = await fetch('/api/auth/sync-user', {
         method: 'POST',
       });
@@ -44,16 +99,17 @@ export function UserProvider({ children }) {
       console.log('[UserContext] User data received:', {
         success: data.success,
         username: data.user?.username,
-        dailyBonusAwarded: data.dailyBonusAwarded
+        biscuits: data.user?.biscuits,
+        dailyBonusAwarded: data.dailyBonusAwarded,
       });
 
       if (data.success) {
         setUser(data.user);
-        console.log('[UserContext] User set successfully');
+        console.log('[UserContext] ✅ User set successfully');
 
         // Show daily bonus notification if awarded
         if (data.dailyBonusAwarded) {
-          const message = `🎁 Daily Login Bonus! +${data.bonusAmount} biscuits`;
+          const message = `Daily login bonus: +${data.bonusAmount} pts`;
           setDailyBonusMessage(message);
           console.log('[UserContext]', message);
 
@@ -66,7 +122,7 @@ export function UserProvider({ children }) {
         throw new Error(data.error || 'Failed to fetch user data');
       }
     } catch (err) {
-      console.error('[UserContext] Error fetching user data:', err);
+      console.error('[UserContext] ❌ Error fetching user data:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -115,6 +171,7 @@ export function UserProvider({ children }) {
     loading,
     error,
     dailyBonusMessage,
+    settlementMessage,
     refreshUser,
     updateBiscuits,
     isAuthenticated: !!userId && !!isSignedIn,

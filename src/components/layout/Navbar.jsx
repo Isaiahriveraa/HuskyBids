@@ -3,17 +3,17 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useUser } from '@clerk/nextjs';
+import { useUser, SignOutButton } from '@clerk/nextjs';
 import { UserButton } from '@clerk/nextjs';
 import {
   LayoutDashboard,
-  Calendar,
   Trophy,
   TrendingUp,
   CheckSquare,
   Menu,
   X,
-  Gamepad2
+  Gamepad2,
+  LogOut
 } from 'lucide-react';
 import BiscuitIcon from '../BiscuitIcon';
 import DarkModeToggle from './DarkModeToggle';
@@ -25,7 +25,7 @@ function StableUserButton({ afterSignOutUrl, appearance, isMobile = false }) {
   const sizeNum = isMobile ? 40 : 36;
 
   useEffect(() => {
-    // Wait for Clerk to fully load
+    // Wait for Clerk to fully load`
     const timer = setTimeout(() => setIsLoaded(true), 100);
     return () => clearTimeout(timer);
   }, []);
@@ -162,6 +162,17 @@ export default function Navbar({ biscuits = 0, loading = false }) {
                   </span>
                 </div>
 
+                {/* Sign Out Button - Desktop */}
+                <SignOutButton redirectUrl="/login">
+                  <button
+                    className="hidden md:flex items-center gap-2 px-3 py-2 rounded-lg bg-transparent text-uw-purple-600 dark:text-uw-purple-300 hover:bg-uw-purple-100 dark:hover:bg-slate-800 hover:text-uw-purple-700 dark:hover:text-uw-purple-200 transition-all duration-200 font-medium text-sm border border-uw-purple-300 dark:border-uw-purple-700 hover:border-uw-purple-400 dark:hover:border-uw-purple-600"
+                    title="Sign Out"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span className="hidden xl:inline">Sign Out</span>
+                  </button>
+                </SignOutButton>
+
                 {/* User Button (Clerk) - Desktop */}
                 <div className="hidden md:block flex-shrink-0">
                   <StableUserButton
@@ -193,19 +204,13 @@ export default function Navbar({ biscuits = 0, loading = false }) {
               </>
             ) : (
               <>
-                {/* Login/Signup Buttons - For logged out users */}
+                {/* Sign In Button - For logged out users */}
                 <div className="hidden md:flex items-center gap-3">
                   <Link
                     href="/login"
-                    className="px-4 py-2 text-uw-purple-600 dark:text-uw-purple-300 font-medium hover:text-uw-purple-700 dark:hover:text-uw-purple-200 transition-colors"
-                  >
-                    Log In
-                  </Link>
-                  <Link
-                    href="/sign-up"
                     className="px-4 py-2 bg-uw-purple-600 dark:bg-uw-purple-700 text-white font-medium rounded-lg hover:bg-uw-purple-700 dark:hover:bg-uw-purple-600 transition-colors shadow-md hover:shadow-lg dark:shadow-lg dark:shadow-uw-purple-900/50"
                   >
-                    Sign Up
+                    Sign In
                   </Link>
                 </div>
 
@@ -261,14 +266,14 @@ export default function Navbar({ biscuits = 0, loading = false }) {
 
                 {/* User Profile in Mobile Menu */}
                 <div
-                  className="pt-4 mt-4 border-t border-gray-200 dark:border-slate-700 flex items-center justify-between"
+                  className="pt-4 mt-4 border-t border-gray-200 dark:border-slate-700"
                   style={{
                     minHeight: '80px',
                     borderTopWidth: '1px',
                     borderTopStyle: 'solid'
                   }}
                 >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="flex items-center gap-3 mb-3">
                     <StableUserButton
                       afterSignOutUrl="/login"
                       appearance={{
@@ -289,25 +294,28 @@ export default function Navbar({ biscuits = 0, loading = false }) {
                       </div>
                     </div>
                   </div>
+
+                  {/* Sign Out Button - Mobile */}
+                  <SignOutButton redirectUrl="/login">
+                    <button
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-transparent text-uw-purple-600 dark:text-uw-purple-300 hover:bg-uw-purple-100 dark:hover:bg-slate-800 hover:text-uw-purple-700 dark:hover:text-uw-purple-200 transition-all duration-200 font-medium border border-uw-purple-300 dark:border-uw-purple-700 hover:border-uw-purple-400 dark:hover:border-uw-purple-600"
+                    >
+                      <LogOut className="w-5 h-5" />
+                      <span>Sign Out</span>
+                    </button>
+                  </SignOutButton>
                 </div>
               </>
             ) : (
               <>
-                {/* Login/Signup for logged-out users */}
+                {/* Sign In for logged-out users */}
                 <div className="space-y-3">
                   <Link
                     href="/login"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center justify-center px-4 py-3 rounded-lg border-2 border-uw-purple-600 dark:border-uw-purple-400 text-uw-purple-600 dark:text-uw-purple-300 font-medium hover:bg-uw-purple-50 dark:hover:bg-slate-800 transition-colors"
-                  >
-                    Log In
-                  </Link>
-                  <Link
-                    href="/sign-up"
-                    onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center justify-center px-4 py-3 rounded-lg bg-uw-purple-600 dark:bg-uw-purple-700 text-white font-medium hover:bg-uw-purple-700 dark:hover:bg-uw-purple-600 transition-colors shadow-md dark:shadow-lg dark:shadow-uw-purple-900/50"
                   >
-                    Sign Up
+                    Sign In
                   </Link>
                 </div>
               </>

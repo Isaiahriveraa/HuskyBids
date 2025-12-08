@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useUser, useAuth } from '@clerk/nextjs';
 
 const UserContext = createContext();
@@ -15,7 +15,7 @@ export function UserProvider({ children }) {
   const [settlementMessage, setSettlementMessage] = useState(null);
 
   // Fetch user data from MongoDB (also handles daily bonus and bet settlement)
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     console.log('[UserContext] fetchUserData called', { userId, clerkLoaded, isSignedIn });
 
     if (!userId) {
@@ -127,7 +127,7 @@ export function UserProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId, clerkLoaded, isSignedIn]); // Dependencies for fetchUserData
 
 
   // Refresh user data (useful after placing bets, etc.)
@@ -164,7 +164,7 @@ export function UserProvider({ children }) {
         setLoading(false);
       }
     }
-  }, [clerkLoaded, userId, isSignedIn]);
+  }, [clerkLoaded, userId, isSignedIn, fetchUserData]);
 
   const value = {
     user,

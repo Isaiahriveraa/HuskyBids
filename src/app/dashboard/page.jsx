@@ -13,6 +13,7 @@ import {
   BetHistoryRow,
   ActionBar,
 } from '@/components/experimental';
+import { DashboardSkeleton } from '@/components/ui/LoadingSkeleton';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -37,6 +38,11 @@ export default function Dashboard() {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [router]);
+
+  // Loading state
+  if (isLoading) {
+    return <DashboardSkeleton />;
+  }
 
   // Error state
   if (error) {

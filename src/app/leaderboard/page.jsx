@@ -10,6 +10,7 @@ import {
   Kbd,
   ActionBar,
 } from '@/components/experimental';
+import { LeaderboardSkeleton } from '@/components/ui/LoadingSkeleton';
 
 const LeaderboardPage = () => {
   const { user } = useUserContext();
@@ -26,6 +27,11 @@ const LeaderboardPage = () => {
     hasPrevPage,
     currentPage
   } = useLeaderboard(itemsPerPage, period, page);
+
+  // Loading state
+  if (loading) {
+    return <LeaderboardSkeleton />;
+  }
 
   // Error state
   if (error) {

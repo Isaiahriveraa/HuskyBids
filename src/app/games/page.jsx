@@ -8,7 +8,6 @@ import {
   ActionBar,
   MinimalGameCard,
   MinimalBettingModal,
-  LoadingScreen,
 } from '@/components/experimental';
 import ErrorBoundary from '@components/ErrorBoundary';
 import { useUserContext } from '../contexts/UserContext';
@@ -163,11 +162,6 @@ export default function GamesPage() {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [syncing, handleSync]);
-
-  // Loading state
-  if (loading) {
-    return <LoadingScreen message="games" />;
-  }
 
   const sportFilters = [
     { id: 'all', label: 'All', key: 'A' },

@@ -3,7 +3,6 @@
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { LoadingScreen } from '@/components/experimental';
 
 export default function Home() {
   const { isSignedIn, isLoaded } = useUser();
@@ -19,10 +18,6 @@ export default function Home() {
     }
   }, [isLoaded, isSignedIn, router]);
 
-  // Show loading while checking authentication
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-950">
-      <LoadingScreen message="HuskyBids" />
-    </div>
-  );
+  // Global loading.jsx handles the loading state during redirect
+  return null;
 }

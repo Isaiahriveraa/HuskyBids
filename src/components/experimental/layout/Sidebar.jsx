@@ -9,7 +9,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { SignOutButton } from '@clerk/nextjs';
+import { useUser, SignOutButton } from '@clerk/nextjs';
 import { sidebarConfig } from '../config/navigation';
 import NavLink from '../ui/NavLink';
 
@@ -19,6 +19,7 @@ export default function Sidebar({
   userName = 'user',
 }) {
   const pathname = usePathname();
+  const { isSignedIn, user } = useUser();
 
   return (
     <aside className="hidden lg:flex lg:flex-col lg:fixed lg:left-0 lg:top-0 lg:bottom-0 lg:w-52 lg:border-r lg:border-dotted lg:border-zinc-800 bg-zinc-950">
@@ -49,20 +50,22 @@ export default function Sidebar({
         })}
       </nav>
 
-      {/* User - minimal */}
-      <div className="p-6 border-t border-dotted border-zinc-800 space-y-3">
-        <div>
-          <p className="text-[10px] text-zinc-700 uppercase tracking-wider">Signed in</p>
-          <p className="text-sm text-zinc-400 mt-1">{userName}</p>
-        </div>
+      {/* User - minimal - Only show when signed in */}
+      {isSignedIn && (
+        <div className="p-6 border-t border-dotted border-zinc-800 space-y-3">
+          <div>
+            <p className="text-[10px] text-zinc-700 uppercase tracking-wider">Signed in</p>
+            <p className="text-sm text-zinc-400 mt-1">{userName}</p>
+          </div>
 
-        {/* Sign Out Button */}
-        <SignOutButton redirectUrl="/login">
-          <button className="w-full px-3 py-2 text-xs text-zinc-500 hover:text-zinc-400 hover:bg-zinc-900 transition-colors border border-dotted border-zinc-800 hover:border-zinc-700 text-left">
-            Sign Out
-          </button>
-        </SignOutButton>
-      </div>
+          {/* Sign Out Button */}
+          <SignOutButton redirectUrl="/login">
+            <button className="w-full px-3 py-2 text-xs text-zinc-500 hover:text-zinc-400 hover:bg-zinc-900 transition-colors border border-dotted border-zinc-800 hover:border-zinc-700 text-left">
+              Sign Out
+            </button>
+          </SignOutButton>
+        </div>
+      )}
     </aside>
   );
 }

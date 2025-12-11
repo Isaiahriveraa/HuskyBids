@@ -10,7 +10,6 @@ import {
   BetHistoryRow,
   Kbd,
   ActionBar,
-  LoadingScreen,
 } from '@/components/experimental';
 import { formatDateTime } from '@shared/utils/date-utils';
 
@@ -54,11 +53,6 @@ export default function BettingHistoryPage() {
       setLoading(false);
     }
   }, [isLoaded, user, fetchBettingHistory]);
-
-  // Loading state
-  if (!isLoaded || loading) {
-    return <LoadingScreen message="history" />;
-  }
 
   // Auth error
   if (!user) {

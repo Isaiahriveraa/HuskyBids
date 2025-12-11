@@ -12,15 +12,11 @@ import {
   StatCard,
   BetHistoryRow,
   ActionBar,
-  LoadingScreen,
 } from '@/components/experimental';
 
 export default function Dashboard() {
   const router = useRouter();
-  const { loading: userLoading } = useUserContext();
   const { stats, isLoading, error } = useUserStats();
-
-  const loading = isLoading || userLoading;
 
   // Keyboard navigation
   useEffect(() => {
@@ -41,11 +37,6 @@ export default function Dashboard() {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [router]);
-
-  // Loading state
-  if (loading) {
-    return <LoadingScreen message="stats" />;
-  }
 
   // Error state
   if (error) {

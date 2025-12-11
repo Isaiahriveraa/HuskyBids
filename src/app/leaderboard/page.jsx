@@ -9,7 +9,6 @@ import {
   LeaderboardRow,
   Kbd,
   ActionBar,
-  LoadingScreen,
 } from '@/components/experimental';
 
 const LeaderboardPage = () => {
@@ -27,11 +26,6 @@ const LeaderboardPage = () => {
     hasPrevPage,
     currentPage
   } = useLeaderboard(itemsPerPage, period, page);
-
-  // Loading state
-  if (loading) {
-    return <LoadingScreen message="leaderboard" />;
-  }
 
   // Error state
   if (error) {

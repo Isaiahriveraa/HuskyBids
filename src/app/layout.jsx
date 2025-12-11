@@ -3,9 +3,10 @@
 import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import { UserProvider } from './contexts/UserContext';
+import { LoadingProvider } from './contexts/LoadingContext';
 import { DarkModeProvider } from './contexts/DarkModeContext';
 import { AccessibilityProvider } from './contexts/AccessibilityContext';
-import SimpleLayout from './SimpleLayout';
+import MinimalLayout from './MinimalLayout';
 
 export default function RootLayout({ children }) {
   return (
@@ -13,32 +14,18 @@ export default function RootLayout({ children }) {
       <head>
         <title>HuskyBids</title>
         <meta name="description" content="Bet on University of Washington sports games using biscuits!" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  const saved = localStorage.getItem('darkMode');
-                  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  const shouldBeDark = saved !== null ? saved === 'true' : prefersDark;
-                  if (shouldBeDark) {
-                    document.documentElement.classList.add('dark');
-                  }
-                } catch (e) {}
-              })();
-            `,
-          }}
-        />
       </head>
       <body suppressHydrationWarning>
         <ClerkProvider>
           <DarkModeProvider>
             <AccessibilityProvider>
-              <UserProvider>
-                <SimpleLayout>
-                  {children}
-                </SimpleLayout>
-              </UserProvider>
+              <LoadingProvider>
+                <UserProvider>
+                  <MinimalLayout>
+                    {children}
+                  </MinimalLayout>
+                </UserProvider>
+              </LoadingProvider>
             </AccessibilityProvider>
           </DarkModeProvider>
         </ClerkProvider>

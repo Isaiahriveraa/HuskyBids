@@ -7,7 +7,6 @@ import {
   DottedDivider,
   Kbd,
   StatCard,
-  LoadingScreen,
 } from '@/components/experimental';
 import { useUserContext } from '../contexts/UserContext';
 import { cn } from '@/shared/utils';
@@ -80,11 +79,6 @@ export default function TasksPage() {
       setClaiming(null);
     }
   };
-
-  // Loading state
-  if (!isLoaded || loading) {
-    return <LoadingScreen message="tasks" />;
-  }
 
   return (
     <div className="py-8 space-y-6 font-mono">

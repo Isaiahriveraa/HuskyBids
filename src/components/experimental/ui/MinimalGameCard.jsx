@@ -224,7 +224,7 @@ export default function MinimalGameCard({
       {game?.totalBetsPlaced > 0 && (
         <div className="mt-3 pt-3 border-t border-dotted border-zinc-900 flex justify-between text-[10px] text-zinc-700">
           <span>{game.totalBetsPlaced} bets</span>
-          <span>{(game.totalBiscuitsWagered || 0).toLocaleString()} 🍪 wagered</span>
+          <span>{(game.totalBiscuitsWagered || 0).toLocaleString()} pts wagered</span>
         </div>
       )}
     </div>

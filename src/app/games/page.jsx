@@ -11,6 +11,7 @@ import {
   MinimalBettingModal,
 } from '@/components/experimental';
 import ErrorBoundary from '@components/ErrorBoundary';
+import { GameCardSkeleton } from '@/components/ui/LoadingSkeleton';
 import { useUserContext } from '../contexts/UserContext';
 
 // SWR fetcher function
@@ -245,7 +246,7 @@ export default function GamesPage() {
       )}
 
       {/* Empty state */}
-      {!error && games.length === 0 && (
+      {!error && !loading && games.length === 0 && (
         <div className="py-12 text-center border border-dotted border-zinc-800">
           <p className="text-zinc-600 text-sm">No games found</p>
           <p className="text-zinc-700 text-xs mt-2">Try syncing games from ESPN</p>
@@ -253,7 +254,7 @@ export default function GamesPage() {
       )}
 
       {/* Games Grid */}
-      {games.length > 0 && (
+      {!loading && games.length > 0 && (
         <div className="max-h-[calc(100vh-20rem)] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {games.map((game) => (

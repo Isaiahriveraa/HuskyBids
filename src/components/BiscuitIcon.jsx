@@ -33,12 +33,12 @@ const BiscuitIcon = memo(function BiscuitIcon({
         />
       ) : (
         <span
-          className="text-center leading-none"
-          style={{ fontSize: size }}
+          className="text-center leading-none font-bold text-xs text-uw-gold"
+          style={{ fontSize: Math.max(10, size * 0.4) }}
           role="img"
-          aria-label="Biscuit"
+          aria-label="Points"
         >
-          🍪
+          Pts
         </span>
       )}
     </div>
@@ -54,7 +54,7 @@ BiscuitIcon.Balance = memo(function BiscuitBalance({ amount, size = 24, showLabe
         {amount?.toLocaleString() || 0}
       </span>
       {showLabel && (
-        <span className="text-sm text-gray-600">biscuits</span>
+        <span className="text-sm text-gray-600">pts</span>
       )}
     </div>
   );

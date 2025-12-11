@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import useSWR from 'swr';
 import {
   SectionLabel,
   DottedDivider,
@@ -12,12 +13,15 @@ import {
 import ErrorBoundary from '@components/ErrorBoundary';
 import { useUserContext } from '../contexts/UserContext';
 
+// SWR fetcher function
+const fetcher = (url) => fetch(url).then(res => {
+  if (!res.ok) throw new Error('Failed to fetch games');
+  return res.json();
+});
+
 export default function GamesPage() {
   const { user: userData, refreshUser, updateBiscuits } = useUserContext();
 
-  const [games, setGames] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [sport, setSport] = useState('all');
   const [syncing, setSyncing] = useState(false);
   const [showPastGames, setShowPastGames] = useState(false);
@@ -29,35 +33,22 @@ export default function GamesPage() {
     game: null
   });
 
-  const fetchGames = useCallback(async () => {
-    try {
-      setLoading(true);
-      const apiEndpoint = showPastGames
-        ? `/api/games/completed?sport=${sport}&limit=50&sort=${sortBy}`
-        : `/api/games/upcoming?sport=${sport}&limit=20&includeCompleted=false`;
+  // Build API endpoint based on filters
+  const apiEndpoint = showPastGames
+    ? `/api/games/completed?sport=${sport}&limit=50&sort=${sortBy}`
+    : `/api/games/upcoming?sport=${sport}&limit=20&includeCompleted=false`;
 
-      const response = await fetch(apiEndpoint);
-      if (!response.ok) throw new Error('Failed to fetch games');
+  // Use SWR for data fetching with caching
+  const { data, error, isLoading, mutate } = useSWR(apiEndpoint, fetcher, {
+    refreshInterval: 60000, // Refresh every 60 seconds
+    dedupingInterval: 15000, // Dedupe requests within 15 seconds
+    revalidateOnFocus: false, // Don't refetch on window focus (can enable if desired)
+  });
 
-      const data = await response.json();
+  const games = data?.games || [];
+  const loading = isLoading;
 
-      // If no upcoming games found, automatically switch to past games
-      if (!showPastGames && data.games.length === 0) {
-        console.log('No upcoming games found, switching to past games view');
-        setShowPastGames(true);
-        return; // This will trigger a re-fetch with showPastGames=true
-      }
-
-      setGames(data.games);
-      setError(null);
-    } catch (err) {
-      console.error('Error fetching games:', err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [sport, showPastGames, sortBy]);
-
+  // Load saved preferences from localStorage
   useEffect(() => {
     const savedShowPastGames = localStorage.getItem('showPastGames');
     const savedSport = localStorage.getItem('sportFilter');
@@ -68,20 +59,24 @@ export default function GamesPage() {
     if (savedSortBy) setSortBy(savedSortBy);
   }, []);
 
+  // Save preferences to localStorage
   useEffect(() => {
     localStorage.setItem('showPastGames', showPastGames.toString());
     localStorage.setItem('sportFilter', sport);
     localStorage.setItem('sortBy', sortBy);
   }, [showPastGames, sport, sortBy]);
 
+  // Auto-switch to past games if no upcoming games found
   useEffect(() => {
-    fetchGames();
-  }, [fetchGames]);
+    if (!showPastGames && !loading && !error && games.length === 0) {
+      console.log('No upcoming games found, switching to past games view');
+      setShowPastGames(true);
+    }
+  }, [showPastGames, loading, error, games.length]);
 
   const handleSync = useCallback(async () => {
     try {
       setSyncing(true);
-      setError(null);
 
       // Sync both football and basketball simultaneously
       const [footballResponse, basketballResponse] = await Promise.all([
@@ -101,15 +96,15 @@ export default function GamesPage() {
         throw new Error(errors.join(', '));
       }
 
-      // Both synced successfully - now reload the games
-      await fetchGames();
+      // Both synced successfully - revalidate the cache
+      await mutate();
       // Silent success - no alert
     } catch (err) {
-      setError(`Sync failed: ${err.message}`);
+      console.error('Sync error:', err);
     } finally {
       setSyncing(false);
     }
-  }, [fetchGames]);
+  }, [mutate]);
 
   const handlePlaceBet = useCallback((game) => {
     if (!userData) {
@@ -128,8 +123,9 @@ export default function GamesPage() {
       updateBiscuits(data.user.biscuits);
       refreshUser();
     }
-    fetchGames();
-  }, [updateBiscuits, refreshUser, fetchGames]);
+    // Revalidate games cache to show updated odds
+    mutate();
+  }, [updateBiscuits, refreshUser, mutate]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -238,9 +234,9 @@ export default function GamesPage() {
       {/* Error state */}
       {error && (
         <div className="py-4 text-center border border-dotted border-zinc-800">
-          <p className="text-zinc-500 text-sm">{error}</p>
-          <button 
-            onClick={fetchGames}
+          <p className="text-zinc-500 text-sm">{error.message || 'Failed to load games'}</p>
+          <button
+            onClick={() => mutate()}
             className="text-zinc-600 text-xs hover:text-zinc-400 underline mt-2"
           >
             Try again

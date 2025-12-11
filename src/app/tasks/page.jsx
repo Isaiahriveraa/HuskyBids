@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import useSWR from 'swr';
 import { useUser } from '@clerk/nextjs';
 import {
   SectionLabel,
@@ -11,6 +12,12 @@ import {
 import { useUserContext } from '../contexts/UserContext';
 import { cn } from '@/shared/utils';
 
+// SWR fetcher function
+const fetcher = (url) => fetch(url).then(res => {
+  if (!res.ok) throw new Error('Failed to fetch tasks');
+  return res.json();
+});
+
 /**
  * Minimal Tasks Page
  * Simple checkbox-style daily tasks that award biscuits
@@ -18,33 +25,22 @@ import { cn } from '@/shared/utils';
 export default function TasksPage() {
   const { user, isLoaded } = useUser();
   const { refreshUser } = useUserContext();
-  const [tasks, setTasks] = useState([]);
-  const [summary, setSummary] = useState(null);
-  const [streak, setStreak] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(null);
 
-  const fetchTaskStatus = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/rewards/status');
-      if (!response.ok) throw new Error('Failed to fetch');
-      const data = await response.json();
-      setTasks(data.tasks || []);
-      setSummary(data.summary || {});
-      setStreak(data.streak || { current: 0 });
-    } catch (err) {
-      console.error('Error fetching tasks:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  // Build cache key
+  const cacheKey = isLoaded && user ? '/api/rewards/status' : null;
 
-  useEffect(() => {
-    if (isLoaded && user) {
-      fetchTaskStatus();
-    }
-  }, [isLoaded, user, fetchTaskStatus]);
+  // Use SWR for data fetching with caching
+  const { data, error, isLoading, mutate } = useSWR(cacheKey, fetcher, {
+    refreshInterval: 60000, // Refresh every 60 seconds
+    dedupingInterval: 15000, // Dedupe requests within 15 seconds
+    revalidateOnFocus: false,
+  });
+
+  const tasks = data?.tasks || [];
+  const summary = data?.summary || null;
+  const streak = data?.streak || null;
+  const loading = isLoading || !isLoaded;
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -71,7 +67,8 @@ export default function TasksPage() {
 
       if (data.success) {
         await refreshUser();
-        await fetchTaskStatus();
+        // Revalidate tasks cache to show updated status
+        await mutate();
       }
     } catch (err) {
       console.error('Error claiming task:', err);

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import useSWR from 'swr';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import {
@@ -13,46 +14,33 @@ import {
 } from '@/components/experimental';
 import { formatDateTime } from '@shared/utils/date-utils';
 
+// SWR fetcher function
+const fetcher = (url) => fetch(url).then(res => {
+  if (!res.ok) throw new Error('Failed to fetch betting history');
+  return res.json();
+});
+
 export default function BettingHistoryPage() {
   const { user, isLoaded } = useUser();
-  const [bets, setBets] = useState([]);
-  const [stats, setStats] = useState(null);
-  const [financial, setFinancial] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [activeFilter, setActiveFilter] = useState('all');
   const [sportFilter, setSportFilter] = useState('all');
 
-  const fetchBettingHistory = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/bets/history?status=${activeFilter}&sport=${sportFilter}`);
+  // Build cache key with filters
+  const cacheKey = isLoaded && user
+    ? `/api/bets/history?status=${activeFilter}&sport=${sportFilter}`
+    : null;
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(errorData.error || 'Failed to fetch betting history');
-      }
+  // Use SWR for data fetching with caching
+  const { data, error, isLoading } = useSWR(cacheKey, fetcher, {
+    refreshInterval: 30000, // Refresh every 30 seconds
+    dedupingInterval: 10000, // Dedupe requests within 10 seconds
+    revalidateOnFocus: false,
+  });
 
-      const data = await response.json();
-      setBets(data.bets || []);
-      setStats(data.stats);
-      setFinancial(data.financial);
-      setError(null);
-    } catch (err) {
-      console.error('Error fetching betting history:', err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [activeFilter, sportFilter]);
-
-  useEffect(() => {
-    if (isLoaded && user) {
-      fetchBettingHistory();
-    } else if (isLoaded && !user) {
-      setLoading(false);
-    }
-  }, [isLoaded, user, fetchBettingHistory]);
+  const bets = data?.bets || [];
+  const stats = data?.stats || null;
+  const financial = data?.financial || null;
+  const loading = isLoading || !isLoaded;
 
   // Auth error
   if (!user) {
@@ -72,13 +60,7 @@ export default function BettingHistoryPage() {
     return (
       <div className="py-8 font-mono">
         <SectionLabel>Error</SectionLabel>
-        <p className="text-zinc-500 text-sm mt-2">{error}</p>
-        <button 
-          onClick={fetchBettingHistory}
-          className="mt-4 text-xs text-zinc-600 hover:text-zinc-400 underline"
-        >
-          Try again
-        </button>
+        <p className="text-zinc-500 text-sm mt-2">{error.message || 'Failed to load betting history'}</p>
       </div>
     );
   }

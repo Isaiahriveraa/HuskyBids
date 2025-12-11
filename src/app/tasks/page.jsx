@@ -9,6 +9,7 @@ import {
   Kbd,
   StatCard,
 } from '@/components/experimental';
+import { StatCardSkeleton } from '@/components/ui/LoadingSkeleton';
 import { useUserContext } from '../contexts/UserContext';
 import { cn } from '@/shared/utils';
 
@@ -42,21 +43,7 @@ export default function TasksPage() {
   const streak = data?.streak || null;
   const loading = isLoading || !isLoaded;
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key >= '1' && e.key <= '9') {
-        const index = parseInt(e.key) - 1;
-        if (tasks[index] && !tasks[index].completed && tasks[index].id === 'daily-login') {
-          handleClaimTask(tasks[index]);
-        }
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [tasks]);
-
-  const handleClaimTask = async (task) => {
+  const handleClaimTask = useCallback(async (task) => {
     if (task.completed || claiming) return;
     if (task.id !== 'daily-login') return;
 
@@ -75,7 +62,21 @@ export default function TasksPage() {
     } finally {
       setClaiming(null);
     }
-  };
+  }, [claiming, refreshUser, mutate]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key >= '1' && e.key <= '9') {
+        const index = parseInt(e.key) - 1;
+        if (tasks[index] && !tasks[index].completed && tasks[index].id === 'daily-login') {
+          handleClaimTask(tasks[index]);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [tasks, handleClaimTask]);
 
   return (
     <div className="py-8 space-y-6 font-mono">
@@ -89,23 +90,33 @@ export default function TasksPage() {
 
       {/* Stats Row */}
       <div className="grid grid-cols-3 gap-3">
-        <StatCard
-          label="Streak"
-          value={streak?.current || 0}
-          suffix=" days"
-          size="sm"
-        />
-        <StatCard
-          label="Completed"
-          value={`${summary?.tasksCompleted || 0}/${summary?.totalTasks || 0}`}
-          size="sm"
-        />
-        <StatCard
-          label="Earned"
-          value={summary?.earnedRewards || 0}
-          suffix=" pts"
-          size="sm"
-        />
+        {loading ? (
+          <>
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+          </>
+        ) : (
+          <>
+            <StatCard
+              label="Streak"
+              value={streak?.current || 0}
+              suffix=" days"
+              size="sm"
+            />
+            <StatCard
+              label="Completed"
+              value={`${summary?.tasksCompleted || 0}/${summary?.totalTasks || 0}`}
+              size="sm"
+            />
+            <StatCard
+              label="Earned"
+              value={summary?.earnedRewards || 0}
+              suffix=" pts"
+              size="sm"
+            />
+          </>
+        )}
       </div>
 
       <DottedDivider />

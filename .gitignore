@@ -76,3 +76,6 @@ yarn-error.log*
 next-env.d.ts
 .next/
 .next/
+
+//CLAUDE
+claude.md 

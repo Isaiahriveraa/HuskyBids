@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import useSWR from 'swr';
 import {
   SectionLabel,
@@ -48,6 +48,7 @@ export default function GamesPage() {
 
   const games = data?.games || [];
   const loading = isLoading;
+  const hasAutoSwitchedRef = useRef(false);
 
   // Load saved preferences from localStorage
   useEffect(() => {
@@ -69,9 +70,10 @@ export default function GamesPage() {
 
   // Auto-switch to past games if no upcoming games found
   useEffect(() => {
-    if (!showPastGames && !loading && !error && games.length === 0) {
+    if (!hasAutoSwitchedRef.current && !showPastGames && !loading && !error && games.length === 0) {
       console.log('No upcoming games found, switching to past games view');
       setShowPastGames(true);
+      hasAutoSwitchedRef.current = true;
     }
   }, [showPastGames, loading, error, games.length]);
 
@@ -254,7 +256,13 @@ export default function GamesPage() {
       )}
 
       {/* Games Grid */}
-      {!loading && games.length > 0 && (
+      {loading && games.length === 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {[...Array(6)].map((_, i) => (
+            <GameCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : !loading && games.length > 0 ? (
         <div className="max-h-[calc(100vh-20rem)] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {games.map((game) => (
@@ -267,7 +275,7 @@ export default function GamesPage() {
             ))}
           </div>
         </div>
-      )}
+      ) : null}
 
       <DottedDivider />
 

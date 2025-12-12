@@ -19,5 +19,7 @@ export default function Home() {
   }, [isLoaded, isSignedIn, router]);
 
   // Global loading.jsx handles the loading state during redirect
+  // This page component does not render anything because it only handles authentication redirects.
+  // The global loading.jsx handles the loading state during redirect.
   return null;
 }

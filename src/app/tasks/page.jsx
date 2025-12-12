@@ -21,7 +21,7 @@ const fetcher = (url) => fetch(url).then(res => {
 
 /**
  * Minimal Tasks Page
- * Simple checkbox-style daily tasks that award biscuits
+ * Simple checkbox-style daily tasks that award points
  */
 export default function TasksPage() {
   const { user, isLoaded } = useUser();
@@ -42,6 +42,26 @@ export default function TasksPage() {
   const summary = data?.summary || null;
   const streak = data?.streak || null;
   const loading = isLoading || !isLoaded;
+
+  // Error state
+  if (error) {
+    return (
+      <div className="py-8 space-y-6 font-mono text-center">
+        <div className="border border-red-900/50 bg-red-900/10 p-6">
+          <SectionLabel className="text-red-500">Error Loading Tasks</SectionLabel>
+          <p className="text-zinc-500 text-sm mt-2 mb-4">
+            We couldn't load your daily tasks. Please try again later.
+          </p>
+          <button 
+            onClick={() => mutate()}
+            className="text-xs border border-zinc-700 hover:border-zinc-500 px-3 py-1 text-zinc-400 hover:text-zinc-200 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const handleClaimTask = useCallback(async (task) => {
     if (task.completed || claiming) return;

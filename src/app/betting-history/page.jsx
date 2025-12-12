@@ -12,6 +12,7 @@ import {
   Kbd,
   ActionBar,
 } from '@/components/experimental';
+import { TableRowSkeleton } from '@/components/ui/LoadingSkeleton';
 import { formatDateTime } from '@shared/utils/date-utils';
 
 // SWR fetcher function
@@ -83,25 +84,25 @@ export default function BettingHistoryPage() {
       {/* Stats Grid */}
       {financial && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <StatCard 
-            label="Total Wagered" 
+          <StatCard
+            label="Total Wagered"
             value={financial.totalWagered || 0}
             size="sm"
           />
-          <StatCard 
-            label="Net Profit" 
+          <StatCard
+            label="Net Profit"
             value={Math.abs(financial.netProfit || 0)}
             prefix={financial.netProfit >= 0 ? '+' : '-'}
             negative={financial.netProfit < 0}
             size="sm"
           />
-          <StatCard 
-            label="Win Rate" 
+          <StatCard
+            label="Win Rate"
             value={stats?.total > 0 ? `${((stats.won / (stats.won + stats.lost || 1)) * 100).toFixed(0)}%` : '0%'}
             size="sm"
           />
-          <StatCard 
-            label="ROI" 
+          <StatCard
+            label="ROI"
             value={`${financial.roi || 0}%`}
             negative={parseFloat(financial.roi) < 0}
             size="sm"
@@ -151,11 +152,21 @@ export default function BettingHistoryPage() {
       <DottedDivider />
 
       {/* Bets List */}
-      {bets.length === 0 ? (
+      {loading && bets.length === 0 ? (
+        <div className="border border-dotted border-zinc-800">
+          <table className="w-full text-left text-sm text-zinc-400">
+            <tbody>
+              {[...Array(5)].map((_, i) => (
+                <TableRowSkeleton key={i} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : bets.length === 0 ? (
         <div className="py-12 text-center border border-dotted border-zinc-800">
           <p className="text-zinc-600 text-sm">No bets found</p>
-          <Link 
-            href="/games" 
+          <Link
+            href="/games"
             className="text-zinc-500 text-xs hover:text-zinc-400 underline mt-2 inline-block"
           >
             Browse games to place bets
@@ -168,8 +179,8 @@ export default function BettingHistoryPage() {
             if (!game) return null;
 
             const gameTitle = `${game.homeTeam?.replace(' Huskies', '').replace(' Washington', 'UW') || 'TBD'} v ${game.awayTeam?.replace(' Huskies', '').replace(' Washington', 'UW') || 'TBD'}`;
-            const prediction = bet.predictedWinner === 'home' 
-              ? game.homeTeam?.replace(' Huskies', '').replace(' Washington', 'UW') 
+            const prediction = bet.predictedWinner === 'home'
+              ? game.homeTeam?.replace(' Huskies', '').replace(' Washington', 'UW')
               : game.awayTeam?.replace(' Huskies', '').replace(' Washington', 'UW');
 
             return (

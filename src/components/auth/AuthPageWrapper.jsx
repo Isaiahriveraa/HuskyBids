@@ -1,7 +1,6 @@
 'use client';
 
 import { useUser } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { LoadingScreen } from '@/components/experimental';
 
@@ -15,14 +14,15 @@ import { LoadingScreen } from '@/components/experimental';
  */
 export default function AuthPageWrapper({ children, redirectUrl = '/dashboard' }) {
   const { isSignedIn, isLoaded } = useUser();
-  const router = useRouter();
 
   // Redirect authenticated users
   useEffect(() => {
     if (isLoaded && isSignedIn) {
-      router.push(redirectUrl);
+      // Use window.location.href instead of router.push to force a full page load
+      // This ensures cookies are properly sent to the server, preventing redirect loops
+      window.location.href = redirectUrl;
     }
-  }, [isLoaded, isSignedIn, router, redirectUrl]);
+  }, [isLoaded, isSignedIn, redirectUrl]);
 
   // Show loading screen ONLY while auth state is being checked
   if (!isLoaded) {

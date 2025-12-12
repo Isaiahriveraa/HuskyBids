@@ -32,7 +32,8 @@ export default authMiddleware({
 
     // Redirect authenticated users away from login/signup pages
     if (userId && (pathname === '/login' || pathname === '/sign-up') && !pathname.startsWith('/sign-up/')) {
-      return NextResponse.redirect(new URL('/dashboard', req.url));
+      const redirectUrl = req.nextUrl.searchParams.get('redirect') || '/dashboard';
+      return NextResponse.redirect(new URL(redirectUrl, req.url));
     }
 
     // Redirect unauthenticated users from protected routes to login

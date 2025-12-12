@@ -2,12 +2,14 @@
 
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useUser, useAuth } from '@clerk/nextjs';
+import { useLoadingActions } from './LoadingContext';
 
 const UserContext = createContext();
 
 export function UserProvider({ children }) {
   const { user: clerkUser, isLoaded: clerkLoaded, isSignedIn } = useUser();
   const { userId } = useAuth();
+  const { setLoading: setGlobalLoading, clearLoading: clearGlobalLoading } = useLoadingActions();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -30,6 +32,7 @@ export function UserProvider({ children }) {
       setError(null);
 
       // STEP 1: Sync games from ESPN to get latest scores and statuses
+      setGlobalLoading('Syncing games from ESPN...');
       console.log('[UserContext] 🔄 Syncing games from ESPN...');
       try {
         // Sync both football and basketball games in parallel
@@ -47,6 +50,7 @@ export function UserProvider({ children }) {
       }
 
       // STEP 2: Auto-settle user's pending bets based on completed games
+      setGlobalLoading('Settling pending bets...');
       console.log('[UserContext] 💰 Auto-settling pending bets...');
       try {
         const settleResponse = await fetch('/api/bets/auto-settle-user', {
@@ -84,6 +88,7 @@ export function UserProvider({ children }) {
       }
 
       // STEP 3: Sync user data (handles user creation and daily bonus)
+      setGlobalLoading('Loading your profile...');
       console.log('[UserContext] 👤 Syncing user data...');
       const response = await fetch('/api/auth/sync-user', {
         method: 'POST',
@@ -126,6 +131,7 @@ export function UserProvider({ children }) {
       setError(err.message);
     } finally {
       setLoading(false);
+      clearGlobalLoading();
     }
   };
 

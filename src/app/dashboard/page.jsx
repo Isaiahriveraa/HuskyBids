@@ -12,15 +12,12 @@ import {
   StatCard,
   BetHistoryRow,
   ActionBar,
-  LoadingScreen,
 } from '@/components/experimental';
+import { DashboardSkeleton } from '@/components/ui/LoadingSkeleton';
 
 export default function Dashboard() {
   const router = useRouter();
-  const { loading: userLoading } = useUserContext();
   const { stats, isLoading, error } = useUserStats();
-
-  const loading = isLoading || userLoading;
 
   // Keyboard navigation
   useEffect(() => {
@@ -43,8 +40,8 @@ export default function Dashboard() {
   }, [router]);
 
   // Loading state
-  if (loading) {
-    return <LoadingScreen message="stats" />;
+  if (isLoading) {
+    return <DashboardSkeleton />;
   }
 
   // Error state

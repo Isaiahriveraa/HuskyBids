@@ -1,51 +1,88 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import useSWR from 'swr';
 import { useUser } from '@clerk/nextjs';
 import {
   SectionLabel,
   DottedDivider,
   Kbd,
   StatCard,
-  LoadingScreen,
 } from '@/components/experimental';
+import { StatCardSkeleton } from '@/components/ui/LoadingSkeleton';
 import { useUserContext } from '../contexts/UserContext';
 import { cn } from '@/shared/utils';
 
+// SWR fetcher function
+const fetcher = (url) => fetch(url).then(res => {
+  if (!res.ok) throw new Error('Failed to fetch tasks');
+  return res.json();
+});
+
 /**
  * Minimal Tasks Page
- * Simple checkbox-style daily tasks that award biscuits
+ * Simple checkbox-style daily tasks that award points
  */
 export default function TasksPage() {
   const { user, isLoaded } = useUser();
   const { refreshUser } = useUserContext();
-  const [tasks, setTasks] = useState([]);
-  const [summary, setSummary] = useState(null);
-  const [streak, setStreak] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(null);
 
-  const fetchTaskStatus = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/rewards/status');
-      if (!response.ok) throw new Error('Failed to fetch');
-      const data = await response.json();
-      setTasks(data.tasks || []);
-      setSummary(data.summary || {});
-      setStreak(data.streak || { current: 0 });
-    } catch (err) {
-      console.error('Error fetching tasks:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  // Build cache key
+  const cacheKey = isLoaded && user ? '/api/rewards/status' : null;
 
-  useEffect(() => {
-    if (isLoaded && user) {
-      fetchTaskStatus();
+  // Use SWR for data fetching with caching
+  const { data, error, isLoading, mutate } = useSWR(cacheKey, fetcher, {
+    refreshInterval: 60000, // Refresh every 60 seconds
+    dedupingInterval: 15000, // Dedupe requests within 15 seconds
+    revalidateOnFocus: false,
+  });
+
+  const tasks = data?.tasks || [];
+  const summary = data?.summary || null;
+  const streak = data?.streak || null;
+  const loading = isLoading || !isLoaded;
+
+  // Error state
+  if (error) {
+    return (
+      <div className="py-8 space-y-6 font-mono text-center">
+        <div className="border border-red-900/50 bg-red-900/10 p-6">
+          <SectionLabel className="text-red-500">Error Loading Tasks</SectionLabel>
+          <p className="text-zinc-500 text-sm mt-2 mb-4">
+            We couldn't load your daily tasks. Please try again later.
+          </p>
+          <button 
+            onClick={() => mutate()}
+            className="text-xs border border-zinc-700 hover:border-zinc-500 px-3 py-1 text-zinc-400 hover:text-zinc-200 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const handleClaimTask = useCallback(async (task) => {
+    if (task.completed || claiming) return;
+    if (task.id !== 'daily-login') return;
+
+    try {
+      setClaiming(task.id);
+      const response = await fetch('/api/rewards/daily-login', { method: 'POST' });
+      const data = await response.json();
+
+      if (data.success) {
+        await refreshUser();
+        // Revalidate tasks cache to show updated status
+        await mutate();
+      }
+    } catch (err) {
+      console.error('Error claiming task:', err);
+    } finally {
+      setClaiming(null);
     }
-  }, [isLoaded, user, fetchTaskStatus]);
+  }, [claiming, refreshUser, mutate]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -59,32 +96,7 @@ export default function TasksPage() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [tasks]);
-
-  const handleClaimTask = async (task) => {
-    if (task.completed || claiming) return;
-    if (task.id !== 'daily-login') return;
-
-    try {
-      setClaiming(task.id);
-      const response = await fetch('/api/rewards/daily-login', { method: 'POST' });
-      const data = await response.json();
-
-      if (data.success) {
-        await refreshUser();
-        await fetchTaskStatus();
-      }
-    } catch (err) {
-      console.error('Error claiming task:', err);
-    } finally {
-      setClaiming(null);
-    }
-  };
-
-  // Loading state
-  if (!isLoaded || loading) {
-    return <LoadingScreen message="tasks" />;
-  }
+  }, [tasks, handleClaimTask]);
 
   return (
     <div className="py-8 space-y-6 font-mono">
@@ -98,23 +110,33 @@ export default function TasksPage() {
 
       {/* Stats Row */}
       <div className="grid grid-cols-3 gap-3">
-        <StatCard
-          label="Streak"
-          value={streak?.current || 0}
-          suffix=" days"
-          size="sm"
-        />
-        <StatCard
-          label="Completed"
-          value={`${summary?.tasksCompleted || 0}/${summary?.totalTasks || 0}`}
-          size="sm"
-        />
-        <StatCard
-          label="Earned"
-          value={summary?.earnedRewards || 0}
-          suffix=" pts"
-          size="sm"
-        />
+        {loading ? (
+          <>
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+          </>
+        ) : (
+          <>
+            <StatCard
+              label="Streak"
+              value={streak?.current || 0}
+              suffix=" days"
+              size="sm"
+            />
+            <StatCard
+              label="Completed"
+              value={`${summary?.tasksCompleted || 0}/${summary?.totalTasks || 0}`}
+              size="sm"
+            />
+            <StatCard
+              label="Earned"
+              value={summary?.earnedRewards || 0}
+              suffix=" pts"
+              size="sm"
+            />
+          </>
+        )}
       </div>
 
       <DottedDivider />

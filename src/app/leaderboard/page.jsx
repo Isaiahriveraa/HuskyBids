@@ -9,8 +9,8 @@ import {
   LeaderboardRow,
   Kbd,
   ActionBar,
-  LoadingScreen,
 } from '@/components/experimental';
+import { LeaderboardSkeleton } from '@/components/ui/LoadingSkeleton';
 
 const LeaderboardPage = () => {
   const { user } = useUserContext();
@@ -30,7 +30,7 @@ const LeaderboardPage = () => {
 
   // Loading state
   if (loading) {
-    return <LoadingScreen message="leaderboard" />;
+    return <LeaderboardSkeleton />;
   }
 
   // Error state

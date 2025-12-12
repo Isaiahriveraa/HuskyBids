@@ -22,6 +22,7 @@
 
 import { cn } from '@/shared/utils';
 import { formatDate, formatTime } from '@shared/utils/date-utils';
+import { Basketball, Football, MapPin } from '@phosphor-icons/react';
 import Kbd from './Kbd';
 
 const statusLabels = {
@@ -106,8 +107,8 @@ export default function MinimalGameCard({
             </span>
           )}
           {game?.sport && (
-            <span className="text-[10px] text-zinc-700 uppercase tracking-wider">
-              {game.sport === 'football' ? '🏈' : '🏀'}
+            <span className="text-zinc-700">
+              {game.sport === 'football' ? <Football size={14} weight="fill" /> : <Basketball size={14} weight="fill" />}
             </span>
           )}
         </div>
@@ -163,8 +164,9 @@ export default function MinimalGameCard({
 
       {/* Location */}
       {game?.location && (
-        <div className="text-[10px] text-zinc-700 mb-3 truncate">
-          📍 {game.location}
+        <div className="text-[10px] text-zinc-700 mb-3 truncate flex items-center gap-1">
+          <MapPin size={12} weight="bold" />
+          {game.location}
         </div>
       )}
 
@@ -224,7 +226,7 @@ export default function MinimalGameCard({
       {game?.totalBetsPlaced > 0 && (
         <div className="mt-3 pt-3 border-t border-dotted border-zinc-900 flex justify-between text-[10px] text-zinc-700">
           <span>{game.totalBetsPlaced} bets</span>
-          <span>{(game.totalBiscuitsWagered || 0).toLocaleString()} 🍪 wagered</span>
+          <span>{(game.totalBiscuitsWagered || 0).toLocaleString()} pts wagered</span>
         </div>
       )}
     </div>

@@ -42,27 +42,103 @@ export default compose(
     bets = bets.filter(bet => bet.gameId && bet.gameId.sport === sport);
   }
 
-  // Count total bets for pagination
-  const totalBets = await Bet.countDocuments(query);
+  // Build aggregation pipeline for counts stats, respecting filters
+  const statsPipeline = [];
+  // Always filter by user
+  statsPipeline.push({ $match: { clerkId: userId } });
+  // Filter by status if needed
+  if (status !== 'all') {
+    statsPipeline.push({ $match: { status } });
+  }
+  // If sport filter is applied, join with Game and filter by sport
+  if (sport !== 'all') {
+    statsPipeline.push(
+      {
+        $lookup: {
+          from: 'games',
+          localField: 'gameId',
+          foreignField: '_id',
+          as: 'game'
+        }
+      },
+      { $unwind: '$game' },
+      { $match: { 'game.sport': sport } }
+    );
+  }
+  statsPipeline.push({
+    $group: {
+      _id: null,
+      total: { $sum: 1 },
+      pending: {
+        $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] }
+      },
+      won: {
+        $sum: { $cond: [{ $eq: ['$status', 'won'] }, 1, 0] }
+      },
+      lost: {
+        $sum: { $cond: [{ $eq: ['$status', 'lost'] }, 1, 0] }
+      },
+      cancelled: {
+        $sum: { $cond: [{ $eq: ['$status', 'cancelled'] }, 1, 0] }
+      }
+    }
+  });
 
-  // Calculate statistics
-  const stats = {
-    total: totalBets,
-    pending: await Bet.countDocuments({ clerkId: userId, status: 'pending' }),
-    won: await Bet.countDocuments({ clerkId: userId, status: 'won' }),
-    lost: await Bet.countDocuments({ clerkId: userId, status: 'lost' }),
-    cancelled: await Bet.countDocuments({ clerkId: userId, status: 'cancelled' }),
+  // Calculate statistics using aggregation (single query instead of 5)
+  const statsAggregation = await Bet.aggregate(statsPipeline);
+
+  const stats = statsAggregation[0] || {
+    total: 0,
+    pending: 0,
+    won: 0,
+    lost: 0,
+    cancelled: 0
   };
 
-  // Calculate financial stats
-  const allBets = await Bet.find({ clerkId: userId }).lean();
-  const totalWagered = allBets.reduce((sum, bet) => sum + bet.betAmount, 0);
-  const totalWon = allBets
-    .filter((bet) => bet.status === 'won')
-    .reduce((sum, bet) => sum + bet.actualWin, 0);
-  const totalLost = allBets
-    .filter((bet) => bet.status === 'lost')
-    .reduce((sum, bet) => sum + bet.betAmount, 0);
+  const totalBets = stats.total;
+
+  // Build aggregation pipeline for financial stats, respecting filters
+  const financialPipeline = [];
+  // Always filter by user
+  financialPipeline.push({ $match: { clerkId: userId } });
+  // Filter by status if needed
+  if (status !== 'all') {
+    financialPipeline.push({ $match: { status } });
+  }
+  // If sport filter is applied, join with Game and filter by sport
+  if (sport !== 'all') {
+    financialPipeline.push(
+      {
+        $lookup: {
+          from: 'games',
+          localField: 'gameId',
+          foreignField: '_id',
+          as: 'game'
+        }
+      },
+      { $unwind: '$game' },
+      { $match: { 'game.sport': sport } }
+    );
+  }
+  financialPipeline.push({
+    $group: {
+      _id: null,
+      totalWagered: { $sum: '$betAmount' },
+      totalWon: {
+        $sum: {
+          $cond: [{ $eq: ['$status', 'won'] }, '$actualWin', 0]
+        }
+      },
+      totalLost: {
+        $sum: {
+          $cond: [{ $eq: ['$status', 'lost'] }, '$betAmount', 0]
+        }
+      }
+    }
+  });
+  const financialStats = await Bet.aggregate(financialPipeline);
+  const financial = financialStats[0] || { totalWagered: 0, totalWon: 0, totalLost: 0 };
+  const { totalWagered, totalWon, totalLost } = financial;
   const netProfit = totalWon - totalLost;
 
   return res.status(200).json({

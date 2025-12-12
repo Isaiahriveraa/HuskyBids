@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import useSWR from 'swr';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import {
@@ -10,55 +11,37 @@ import {
   BetHistoryRow,
   Kbd,
   ActionBar,
-  LoadingScreen,
 } from '@/components/experimental';
+import { TableRowSkeleton } from '@/components/ui/LoadingSkeleton';
 import { formatDateTime } from '@shared/utils/date-utils';
+
+// SWR fetcher function
+const fetcher = (url) => fetch(url).then(res => {
+  if (!res.ok) throw new Error('Failed to fetch betting history');
+  return res.json();
+});
 
 export default function BettingHistoryPage() {
   const { user, isLoaded } = useUser();
-  const [bets, setBets] = useState([]);
-  const [stats, setStats] = useState(null);
-  const [financial, setFinancial] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [activeFilter, setActiveFilter] = useState('all');
   const [sportFilter, setSportFilter] = useState('all');
 
-  const fetchBettingHistory = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/bets/history?status=${activeFilter}&sport=${sportFilter}`);
+  // Build cache key with filters
+  const cacheKey = isLoaded && user
+    ? `/api/bets/history?status=${activeFilter}&sport=${sportFilter}`
+    : null;
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(errorData.error || 'Failed to fetch betting history');
-      }
+  // Use SWR for data fetching with caching
+  const { data, error, isLoading } = useSWR(cacheKey, fetcher, {
+    refreshInterval: 30000, // Refresh every 30 seconds
+    dedupingInterval: 10000, // Dedupe requests within 10 seconds
+    revalidateOnFocus: false,
+  });
 
-      const data = await response.json();
-      setBets(data.bets || []);
-      setStats(data.stats);
-      setFinancial(data.financial);
-      setError(null);
-    } catch (err) {
-      console.error('Error fetching betting history:', err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [activeFilter, sportFilter]);
-
-  useEffect(() => {
-    if (isLoaded && user) {
-      fetchBettingHistory();
-    } else if (isLoaded && !user) {
-      setLoading(false);
-    }
-  }, [isLoaded, user, fetchBettingHistory]);
-
-  // Loading state
-  if (!isLoaded || loading) {
-    return <LoadingScreen message="history" />;
-  }
+  const bets = data?.bets || [];
+  const stats = data?.stats || null;
+  const financial = data?.financial || null;
+  const loading = isLoading || !isLoaded;
 
   // Auth error
   if (!user) {
@@ -78,13 +61,7 @@ export default function BettingHistoryPage() {
     return (
       <div className="py-8 font-mono">
         <SectionLabel>Error</SectionLabel>
-        <p className="text-zinc-500 text-sm mt-2">{error}</p>
-        <button 
-          onClick={fetchBettingHistory}
-          className="mt-4 text-xs text-zinc-600 hover:text-zinc-400 underline"
-        >
-          Try again
-        </button>
+        <p className="text-zinc-500 text-sm mt-2">{error.message || 'Failed to load betting history'}</p>
       </div>
     );
   }
@@ -107,25 +84,25 @@ export default function BettingHistoryPage() {
       {/* Stats Grid */}
       {financial && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <StatCard 
-            label="Total Wagered" 
+          <StatCard
+            label="Total Wagered"
             value={financial.totalWagered || 0}
             size="sm"
           />
-          <StatCard 
-            label="Net Profit" 
+          <StatCard
+            label="Net Profit"
             value={Math.abs(financial.netProfit || 0)}
             prefix={financial.netProfit >= 0 ? '+' : '-'}
             negative={financial.netProfit < 0}
             size="sm"
           />
-          <StatCard 
-            label="Win Rate" 
+          <StatCard
+            label="Win Rate"
             value={stats?.total > 0 ? `${((stats.won / (stats.won + stats.lost || 1)) * 100).toFixed(0)}%` : '0%'}
             size="sm"
           />
-          <StatCard 
-            label="ROI" 
+          <StatCard
+            label="ROI"
             value={`${financial.roi || 0}%`}
             negative={parseFloat(financial.roi) < 0}
             size="sm"
@@ -175,11 +152,21 @@ export default function BettingHistoryPage() {
       <DottedDivider />
 
       {/* Bets List */}
-      {bets.length === 0 ? (
+      {loading && bets.length === 0 ? (
+        <div className="border border-dotted border-zinc-800">
+          <table className="w-full text-left text-sm text-zinc-400">
+            <tbody>
+              {[...Array(5)].map((_, i) => (
+                <TableRowSkeleton key={i} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : bets.length === 0 ? (
         <div className="py-12 text-center border border-dotted border-zinc-800">
           <p className="text-zinc-600 text-sm">No bets found</p>
-          <Link 
-            href="/games" 
+          <Link
+            href="/games"
             className="text-zinc-500 text-xs hover:text-zinc-400 underline mt-2 inline-block"
           >
             Browse games to place bets
@@ -192,8 +179,8 @@ export default function BettingHistoryPage() {
             if (!game) return null;
 
             const gameTitle = `${game.homeTeam?.replace(' Huskies', '').replace(' Washington', 'UW') || 'TBD'} v ${game.awayTeam?.replace(' Huskies', '').replace(' Washington', 'UW') || 'TBD'}`;
-            const prediction = bet.predictedWinner === 'home' 
-              ? game.homeTeam?.replace(' Huskies', '').replace(' Washington', 'UW') 
+            const prediction = bet.predictedWinner === 'home'
+              ? game.homeTeam?.replace(' Huskies', '').replace(' Washington', 'UW')
               : game.awayTeam?.replace(' Huskies', '').replace(' Washington', 'UW');
 
             return (

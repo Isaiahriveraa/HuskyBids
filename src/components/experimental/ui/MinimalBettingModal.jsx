@@ -279,7 +279,7 @@ export default function MinimalBettingModal({ game, isOpen, onClose, onBetPlaced
                 <span className="text-[10px] uppercase tracking-wider text-zinc-600">Amount</span>
                 <span className="text-[10px] text-zinc-700">Min: {BETTING_LIMITS.MIN_BET}</span>
                 <span className="text-[10px] text-zinc-700">•</span>
-                <span className="text-[10px] text-zinc-700">Available: {userBiscuits.toLocaleString()}</span>
+                <span className="text-[10px] text-zinc-700">Available: {userBiscuits.toLocaleString()} pts</span>
               </div>
               <input
                 type="number"
@@ -335,7 +335,7 @@ export default function MinimalBettingModal({ game, isOpen, onClose, onBetPlaced
                   <div className="flex justify-between text-sm mb-2">
                     <span className="text-zinc-600">Potential payout</span>
                     <span className="text-zinc-300 font-bold tabular-nums">
-                      🍪 {calculatePotentialWin().toLocaleString()}
+                      {calculatePotentialWin().toLocaleString()} pts
                     </span>
                   </div>
                   <div className="flex justify-between text-xs">
@@ -398,7 +398,7 @@ export default function MinimalBettingModal({ game, isOpen, onClose, onBetPlaced
 
             {/* Help Text */}
             <div className="mt-4 text-[10px] text-zinc-700 text-center">
-              Bets cannot be cancelled. Biscuits deducted immediately.
+              Bets cannot be cancelled. Points deducted immediately.
             </div>
           </>
         )}

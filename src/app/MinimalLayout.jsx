@@ -1,8 +1,11 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { useUser } from '@clerk/nextjs';
 import { useUserContext } from './contexts/UserContext';
 import { AppShell } from '@/components/experimental';
+import HuskyBidsLoader from '@/components/experimental/ui/HuskyBidsLoader';
 import RoutePreloader from '@components/RoutePreloader';
 import PageTransition from '@components/layout/PageTransition';
 import { Alert } from '@components/ui';
@@ -18,11 +21,20 @@ import { Alert } from '@components/ui';
  */
 export default function MinimalLayout({ children }) {
   const pathname = usePathname();
-  const { user, loading: userLoading, dailyBonusMessage, settlementMessage } = useUserContext();
+  const router = useRouter();
+  const { isLoaded: clerkLoaded, isSignedIn } = useUser();
+  const { user, dailyBonusMessage, settlementMessage } = useUserContext();
 
   // Pages that should not show the AppShell navigation
   const hideShellPages = ['/login', '/sign-up'];
   const showShell = !hideShellPages.includes(pathname);
+
+  // Redirect unauthenticated users from protected pages to sign-up
+  useEffect(() => {
+    if (clerkLoaded && !isSignedIn && showShell) {
+      router.replace('/sign-up');
+    }
+  }, [clerkLoaded, isSignedIn, showShell, router]);
 
   // Extract user data for AppShell
   const biscuits = user?.biscuits ?? 0;
@@ -33,6 +45,30 @@ export default function MinimalLayout({ children }) {
     return (
       <div className="min-h-screen bg-zinc-950 text-white font-mono">
         {children}
+      </div>
+    );
+  }
+
+  // Clerk still loading - show minimal loading state
+  if (!clerkLoaded) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+        <p className="text-zinc-500 font-mono text-sm">Loading...</p>
+      </div>
+    );
+  }
+
+  // User not authenticated but on protected page - show redirect message
+  if (!isSignedIn) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center font-mono">
+        <HuskyBidsLoader size="lg" centered />
+        <p className="mt-6 text-zinc-500 text-sm text-center max-w-md px-4">
+          Redirecting to sign up page...
+        </p>
+        <p className="mt-2 text-zinc-600 text-xs text-center max-w-md px-4">
+          Create an account or login to access these features
+        </p>
       </div>
     );
   }

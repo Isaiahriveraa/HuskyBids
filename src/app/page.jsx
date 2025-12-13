@@ -11,15 +11,19 @@ export default function Home() {
   useEffect(() => {
     if (isLoaded) {
       if (isSignedIn) {
-        router.push('/dashboard');
+        router.replace('/dashboard');
       } else {
-        router.push('/sign-up');
+        router.replace('/sign-up');
       }
     }
   }, [isLoaded, isSignedIn, router]);
 
-  // Global loading.jsx handles the loading state during redirect
-  // This page component does not render anything because it only handles authentication redirects.
-  // The global loading.jsx handles the loading state during redirect.
-  return null;
+  // Show loading message while auth state is being determined
+  return (
+    <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+      <p className="text-zinc-500 font-mono text-sm">
+        {isLoaded ? (isSignedIn ? 'Loading dashboard...' : 'Redirecting...') : 'Loading...'}
+      </p>
+    </div>
+  );
 }

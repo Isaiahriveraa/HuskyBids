@@ -49,6 +49,26 @@ export default function GamesPage() {
   const games = data?.games || [];
   const loading = isLoading;
   const hasAutoSwitchedRef = useRef(false);
+  const hasAutoSyncedRef = useRef(false);
+
+  // Auto-sync games on mount if not synced recently (5 min cache)
+  useEffect(() => {
+    const SYNC_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+    const lastSync = localStorage.getItem('lastGameSync');
+    const now = Date.now();
+
+    if (!hasAutoSyncedRef.current && (!lastSync || now - parseInt(lastSync) > SYNC_CACHE_DURATION)) {
+      hasAutoSyncedRef.current = true;
+      // Silent background sync - no loading state shown
+      Promise.all([
+        fetch('/api/games/sync-from-espn?sport=football', { method: 'POST' }).catch(() => {}),
+        fetch('/api/games/sync-from-espn?sport=basketball', { method: 'POST' }).catch(() => {}),
+      ]).then(() => {
+        localStorage.setItem('lastGameSync', now.toString());
+        mutate(); // Refresh the game list
+      });
+    }
+  }, [mutate]);
 
   // Load saved preferences from localStorage
   useEffect(() => {
@@ -99,9 +119,9 @@ export default function GamesPage() {
         throw new Error(errors.join(', '));
       }
 
-      // Both synced successfully - revalidate the cache
+      // Both synced successfully - update cache timestamp and revalidate
+      localStorage.setItem('lastGameSync', Date.now().toString());
       await mutate();
-      // Silent success - no alert
     } catch (err) {
       console.error('Sync error:', err);
     } finally {

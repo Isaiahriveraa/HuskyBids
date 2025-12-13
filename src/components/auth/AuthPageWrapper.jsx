@@ -1,42 +1,46 @@
 'use client';
 
 import { useUser } from '@clerk/nextjs';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { LoadingScreen } from '@/components/experimental';
 
 /**
  * AuthPageWrapper - Wraps authentication pages with loading state
  * Prevents flash of auth forms when user is already authenticated
- * Shows "Loading HuskyBids dashboard..." during redirect
+ * Uses window.location.replace for clean redirects without history pollution
  *
  * @param {React.ReactNode} children - The Clerk SignIn/SignUp component
  * @param {string} redirectUrl - Where to redirect authenticated users
  */
 export default function AuthPageWrapper({ children, redirectUrl = '/dashboard' }) {
   const { isSignedIn, isLoaded } = useUser();
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
-  // Redirect authenticated users
+  // Redirect authenticated users using window.location for clean redirect
   useEffect(() => {
-    if (isLoaded && isSignedIn) {
-      // Use window.location.href instead of router.push to force a full page load
-      // This ensures cookies are properly sent to the server, preventing redirect loops
-      window.location.href = redirectUrl;
+    if (isLoaded && isSignedIn && !isRedirecting) {
+      setIsRedirecting(true);
+      // Use replace to avoid adding to history stack (prevents back button loop)
+      window.location.replace(redirectUrl);
     }
-  }, [isLoaded, isSignedIn, redirectUrl]);
+  }, [isLoaded, isSignedIn, redirectUrl, isRedirecting]);
 
-  // Show loading screen ONLY while auth state is being checked
-  if (!isLoaded) {
+  // Show loading screen while auth state is being checked OR while redirecting
+  if (!isLoaded || isRedirecting) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <LoadingScreen message="Loading" />
+        <LoadingScreen message={isRedirecting ? "Redirecting" : "Loading"} />
       </div>
     );
   }
 
-  // If user is signed in, return null and let the redirect happen
-  // The useEffect above will handle navigation to dashboard
+  // If user is signed in but redirect hasn't started yet, show loading
   if (isSignedIn) {
-    return null;
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+        <LoadingScreen message="Redirecting" />
+      </div>
+    );
   }
 
   // User is not signed in - show the auth form

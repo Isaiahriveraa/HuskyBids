@@ -30,18 +30,16 @@ export default authMiddleware({
 
     const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
 
-    // Redirect authenticated users away from login/signup pages
-    if (userId && (pathname === '/login' || pathname === '/sign-up') && !pathname.startsWith('/sign-up/')) {
-      const redirectUrl = req.nextUrl.searchParams.get('redirect') || '/dashboard';
-      return NextResponse.redirect(new URL(redirectUrl, req.url));
-    }
-
     // Redirect unauthenticated users from protected routes to login
     if (!userId && isProtectedRoute) {
       const loginUrl = new URL('/login', req.url);
       loginUrl.searchParams.set('redirect', pathname);
       return NextResponse.redirect(loginUrl);
     }
+
+    // NOTE: Do NOT redirect authenticated users from /login here.
+    // Let AuthPageWrapper handle that client-side to avoid race conditions
+    // with Clerk's session initialization after sign-in.
 
     return NextResponse.next();
   },

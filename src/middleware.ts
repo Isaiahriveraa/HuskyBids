@@ -17,6 +17,25 @@ export default authMiddleware({
     const { userId } = auth;
     const { pathname } = req.nextUrl;
 
+    // If a signed-in user hits an auth page, redirect them away immediately.
+    // This prevents Clerk from internally redirecting to the Home URL and
+    // avoids navigation-throttling loops in the browser.
+    if (userId && (pathname.startsWith('/login') || pathname.startsWith('/sign-up'))) {
+      const requestedRedirect = req.nextUrl.searchParams.get('redirect');
+      const safeRedirect =
+        requestedRedirect && requestedRedirect.startsWith('/')
+          ? requestedRedirect
+          : '/dashboard';
+
+      // Avoid redirecting to another auth route.
+      const destination =
+        safeRedirect.startsWith('/login') || safeRedirect.startsWith('/sign-up')
+          ? '/dashboard'
+          : safeRedirect;
+
+      return NextResponse.redirect(new URL(destination, req.url));
+    }
+
     // Protected routes that require authentication
     const protectedRoutes = [
       '/dashboard',
@@ -30,16 +49,12 @@ export default authMiddleware({
 
     const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
 
-    // Redirect unauthenticated users from protected routes to login
+    // Redirect unauthenticated users from protected routes to sign-up
     if (!userId && isProtectedRoute) {
-      const loginUrl = new URL('/login', req.url);
-      loginUrl.searchParams.set('redirect', pathname);
-      return NextResponse.redirect(loginUrl);
+      const signUpUrl = new URL('/sign-up', req.url);
+      signUpUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(signUpUrl);
     }
-
-    // NOTE: Do NOT redirect authenticated users from /login here.
-    // Let AuthPageWrapper handle that client-side to avoid race conditions
-    // with Clerk's session initialization after sign-in.
 
     return NextResponse.next();
   },

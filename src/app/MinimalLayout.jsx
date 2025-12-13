@@ -26,8 +26,8 @@ export default function MinimalLayout({ children }) {
   const { user, dailyBonusMessage, settlementMessage } = useUserContext();
 
   // Pages that should not show the AppShell navigation
-  const hideShellPages = ['/login', '/sign-up'];
-  const showShell = !hideShellPages.includes(pathname);
+  const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/sign-up');
+  const showShell = !isAuthRoute;
 
   // Redirect unauthenticated users from protected pages to sign-up
   useEffect(() => {

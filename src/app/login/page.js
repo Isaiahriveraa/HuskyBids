@@ -3,19 +3,17 @@
 import { SignIn } from '@clerk/nextjs';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import AuthPageWrapper from '@/components/auth/AuthPageWrapper';
 
 /**
  * Login Page
  * Uses Clerk's pre-built SignIn component for authentication
- * Wrapped with AuthPageWrapper to prevent flash during redirect
+ * Clerk handles redirects natively via afterSignInUrl
  */
 export default function LoginPage() {
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get('redirect') || '/dashboard';
 
   return (
-    <AuthPageWrapper redirectUrl={redirectUrl}>
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4 py-12 font-mono">
       <div className="w-full max-w-md space-y-8">
         {/* Minimal header */}
@@ -77,6 +75,5 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
-    </AuthPageWrapper>
   );
 }

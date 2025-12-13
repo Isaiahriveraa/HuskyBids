@@ -9,7 +9,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useUser, SignOutButton } from '@clerk/nextjs';
+import { useUser, useClerk } from '@clerk/nextjs';
 import { sidebarConfig } from '../config/navigation';
 import NavLink from '../ui/NavLink';
 
@@ -20,6 +20,7 @@ export default function Sidebar({
 }) {
   const pathname = usePathname();
   const { isSignedIn } = useUser();
+  const { signOut } = useClerk();
 
   return (
     <aside className="hidden lg:flex lg:flex-col lg:fixed lg:left-0 lg:top-0 lg:bottom-0 lg:w-52 lg:border-r lg:border-dotted lg:border-zinc-800 bg-zinc-950">
@@ -59,11 +60,13 @@ export default function Sidebar({
           </div>
 
           {/* Sign Out Button */}
-          <SignOutButton redirectUrl="/login">
-            <button className="w-full px-3 py-2 text-xs text-zinc-500 hover:text-zinc-400 hover:bg-zinc-900 transition-colors border border-dotted border-zinc-800 hover:border-zinc-700 text-left">
-              Sign Out
-            </button>
-          </SignOutButton>
+          <button
+            type="button"
+            onClick={() => signOut(() => window.location.assign('/sign-up'))}
+            className="w-full px-3 py-2 text-xs text-zinc-500 hover:text-zinc-400 hover:bg-zinc-900 transition-colors border border-dotted border-zinc-800 hover:border-zinc-700 text-left"
+          >
+            Sign Out
+          </button>
         </div>
       )}
     </aside>

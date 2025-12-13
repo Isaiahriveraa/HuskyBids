@@ -23,22 +23,13 @@ export default function AuthPageWrapper({ children, redirectUrl = '/dashboard' }
       // Use replace to avoid adding to history stack (prevents back button loop)
       window.location.replace(redirectUrl);
     }
-  }, [isLoaded, isSignedIn, redirectUrl, isRedirecting]);
+  }, [isLoaded, isSignedIn, redirectUrl]);
 
   // Show loading screen while auth state is being checked OR while redirecting
   if (!isLoaded || isRedirecting) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <LoadingScreen message={isRedirecting ? "Redirecting" : "Loading"} />
-      </div>
-    );
-  }
-
-  // If user is signed in but redirect hasn't started yet, show loading
-  if (isSignedIn) {
-    return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <LoadingScreen message="Redirecting" />
       </div>
     );
   }

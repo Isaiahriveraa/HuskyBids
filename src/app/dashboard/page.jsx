@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUserContext } from '../contexts/UserContext';
@@ -17,7 +17,37 @@ import { DashboardSkeleton } from '@/components/ui/LoadingSkeleton';
 
 export default function Dashboard() {
   const router = useRouter();
-  const { stats, isLoading, error } = useUserStats();
+  const { stats, isLoading, error, mutate } = useUserStats();
+  const { refreshUser, showSettlementNotification } = useUserContext();
+  const hasSettledRef = useRef(false);
+
+  // Auto-settle pending bets on mount (silent, with 2 min cache)
+  useEffect(() => {
+    const SETTLE_CACHE_DURATION = 2 * 60 * 1000; // 2 minutes
+    const lastSettle = localStorage.getItem('lastBetSettlement');
+    const now = Date.now();
+
+    if (!hasSettledRef.current && (!lastSettle || now - parseInt(lastSettle) > SETTLE_CACHE_DURATION)) {
+      hasSettledRef.current = true;
+
+      fetch('/api/bets/auto-settle-user', { method: 'POST' })
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (data?.settled > 0) {
+            localStorage.setItem('lastBetSettlement', now.toString());
+            const netChange = data.netChange || 0;
+            const sign = netChange > 0 ? '+' : '';
+            showSettlementNotification(
+              `${data.settled} bet${data.settled > 1 ? 's' : ''} settled: ${sign}${netChange} pts`
+            );
+            // Refresh data to show updated stats
+            mutate();
+            refreshUser();
+          }
+        })
+        .catch(() => {}); // Silent fail
+    }
+  }, [mutate, refreshUser, showSettlementNotification]);
 
   // Keyboard navigation
   useEffect(() => {

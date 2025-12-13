@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import Home from '../page';
 import '@testing-library/jest-dom';
 
@@ -30,7 +30,7 @@ describe('Landing Page (Home)', () => {
     jest.clearAllMocks();
   });
 
-  it('renders sign-up and login buttons for unauthenticated users and does NOT redirect', async () => {
+  it('renders sign-up and login buttons for unauthenticated users and does NOT redirect', () => {
     // Simulate unauthenticated user
     mockUseUser.mockReturnValue({
       isSignedIn: false,
@@ -49,7 +49,7 @@ describe('Landing Page (Home)', () => {
     expect(mockPush).not.toHaveBeenCalled();
   });
 
-  it('renders dashboard link for authenticated users', async () => {
+  it('renders dashboard link for authenticated users', () => {
     // Simulate authenticated user
     mockUseUser.mockReturnValue({
       isSignedIn: true,
@@ -66,7 +66,7 @@ describe('Landing Page (Home)', () => {
   });
 
   it('does not redirect while loading auth state', () => {
-     mockUseUser.mockReturnValue({
+    mockUseUser.mockReturnValue({
       isSignedIn: false,
       isLoaded: false,
     });

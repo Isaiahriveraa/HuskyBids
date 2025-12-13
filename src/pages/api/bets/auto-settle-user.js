@@ -127,8 +127,8 @@ export default async function handler(req, res) {
       }
     }
 
-    // Reload user to get updated balance and stats
-    await user.reload();
+    // Re-fetch user to get updated balance and stats
+    const updatedUser = await User.findOne({ clerkId });
 
     console.log(`📊 Settlement Summary: ${settledCount} bets settled (${wonCount} won, ${lostCount} lost, ${refundedCount} refunded)`);
     console.log(`💰 Net change: ${totalWinnings - totalLosses} biscuits`);
@@ -146,12 +146,12 @@ export default async function handler(req, res) {
       totalLosses,
       netChange: totalWinnings - totalLosses,
       user: {
-        biscuits: user.biscuits,
-        winningBets: user.winningBets,
-        losingBets: user.losingBets,
-        pendingBets: user.pendingBets,
-        totalBiscuitsWon: user.totalBiscuitsWon,
-        totalBiscuitsLost: user.totalBiscuitsLost,
+        biscuits: updatedUser.biscuits,
+        winningBets: updatedUser.winningBets,
+        losingBets: updatedUser.losingBets,
+        pendingBets: updatedUser.pendingBets,
+        totalBiscuitsWon: updatedUser.totalBiscuitsWon,
+        totalBiscuitsLost: updatedUser.totalBiscuitsLost,
       },
       details: settlementDetails,
     });

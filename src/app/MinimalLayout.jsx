@@ -1,7 +1,6 @@
 'use client';
 
-import { usePathname, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { useUserContext } from './contexts/UserContext';
 import { AppShell } from '@/components/experimental';
@@ -21,7 +20,6 @@ import { Alert } from '@components/ui';
  */
 export default function MinimalLayout({ children }) {
   const pathname = usePathname();
-  const router = useRouter();
   const { isLoaded: clerkLoaded, isSignedIn } = useUser();
   const { user, dailyBonusMessage, settlementMessage } = useUserContext();
 
@@ -29,12 +27,7 @@ export default function MinimalLayout({ children }) {
   const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/sign-up') || pathname === '/';
   const showShell = !isAuthRoute;
 
-  // Redirect unauthenticated users from protected pages to sign-up
-  useEffect(() => {
-    if (clerkLoaded && !isSignedIn && showShell) {
-      router.replace('/sign-up');
-    }
-  }, [clerkLoaded, isSignedIn, showShell, router]);
+  // Note: Auth redirects are handled by middleware.ts - no client-side redirect needed
 
   // Extract user data for AppShell
   const biscuits = user?.biscuits ?? 0;
@@ -58,17 +51,11 @@ export default function MinimalLayout({ children }) {
     );
   }
 
-  // User not authenticated but on protected page - show redirect message
+  // User not authenticated but on protected page - middleware will redirect
   if (!isSignedIn) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center font-mono">
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <HuskyBidsLoader size="lg" centered />
-        <p className="mt-6 text-zinc-500 text-sm text-center max-w-md px-4">
-          Redirecting to sign up page...
-        </p>
-        <p className="mt-2 text-zinc-600 text-xs text-center max-w-md px-4">
-          Create an account or login to access these features
-        </p>
       </div>
     );
   }

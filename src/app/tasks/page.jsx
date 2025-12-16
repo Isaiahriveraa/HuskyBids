@@ -12,6 +12,7 @@ import {
 import { StatCardSkeleton } from '@/components/ui/LoadingSkeleton';
 import { useUserContext } from '../contexts/UserContext';
 import { cn } from '@/shared/utils';
+import FireIcon from '@/components/FireIcon';
 
 // SWR fetcher function
 const fetcher = (url) => fetch(url).then(res => {
@@ -165,7 +166,7 @@ export default function TasksPage() {
       {/* Streak Bonus Info */}
       <div className="border border-dotted border-zinc-800 p-4">
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-orange-500">🔥</span>
+          <FireIcon size={16} />
           <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Streak Bonuses</span>
         </div>
         <div className="grid grid-cols-3 gap-4 text-center">

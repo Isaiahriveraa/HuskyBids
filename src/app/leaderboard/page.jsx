@@ -160,16 +160,6 @@ const LeaderboardPage = () => {
           </div>
         </div>
       )}
-
-      <DottedDivider />
-
-      {/* Actions */}
-      <ActionBar
-        actions={[
-          { key: 'D', label: 'Dashboard' },
-          { key: 'G', label: 'Games' },
-        ]}
-      />
     </div>
   );
 };

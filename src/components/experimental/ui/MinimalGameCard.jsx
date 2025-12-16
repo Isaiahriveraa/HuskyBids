@@ -107,8 +107,12 @@ export default function MinimalGameCard({
             </span>
           )}
           {game?.sport && (
-            <span className="text-zinc-700">
-              {game.sport === 'football' ? <Football size={14} weight="fill" /> : <Basketball size={14} weight="fill" />}
+            <span>
+              {game.sport === 'football' ? (
+                <Football size={14} weight="fill" className="text-amber-800" />
+              ) : (
+                <Basketball size={14} weight="fill" className="text-orange-500" />
+              )}
             </span>
           )}
         </div>
@@ -178,7 +182,7 @@ export default function MinimalGameCard({
               e.stopPropagation();
               handleBetClick('home');
             }}
-            className="flex-1 py-2 text-xs text-zinc-500 border border-dotted border-zinc-800 hover:border-purple-600 hover:text-purple-400 transition-colors"
+            className="flex-1 py-2 text-xs text-zinc-500 border border-dotted border-zinc-800 hover:border-zinc-600 hover:text-white transition-colors"
           >
             {displayTeam1.split(' ').pop()} <span className="text-zinc-600 ml-1">{displayHomeOdds.toFixed(2)}x</span>
           </button>
@@ -187,7 +191,7 @@ export default function MinimalGameCard({
               e.stopPropagation();
               handleBetClick('away');
             }}
-            className="flex-1 py-2 text-xs text-zinc-500 border border-dotted border-zinc-800 hover:border-zinc-600 hover:text-zinc-300 transition-colors"
+            className="flex-1 py-2 text-xs text-zinc-500 border border-dotted border-zinc-800 hover:border-zinc-600 hover:text-white transition-colors"
           >
             {displayTeam2.split(' ').pop()} <span className="text-zinc-600 ml-1">{displayAwayOdds.toFixed(2)}x</span>
           </button>

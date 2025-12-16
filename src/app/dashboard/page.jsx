@@ -165,7 +165,6 @@ export default function Dashboard() {
       <ActionBar
         actions={[
           { key: 'G', label: 'Games' },
-          { key: 'N', label: 'New bet' },
           { key: 'B', label: 'All bets' },
         ]}
       />

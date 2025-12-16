@@ -10,6 +10,38 @@ module.exports = {
     extend: {
       // UW Official Color Palette
       colors: {
+        // Minimalist Design System - Semantic Tokens
+        // These are the single source of truth for the UI
+        // Change these to update the entire design system
+        'primary': {
+          DEFAULT: '#f4f4f5',  // zinc-100 - main CTA buttons
+          hover: '#ffffff',     // white - button hover state
+          text: '#09090b',      // zinc-950 - text on primary buttons
+        },
+        'secondary': {
+          DEFAULT: 'transparent',
+          border: '#3f3f46',    // zinc-700 - secondary button borders
+          'border-hover': '#71717a', // zinc-500 - border hover
+          text: '#d4d4d8',      // zinc-300 - secondary button text
+          'text-hover': '#ffffff', // white - secondary text hover
+        },
+        'background': {
+          DEFAULT: '#09090b',   // zinc-950 - main background
+          secondary: '#18181b', // zinc-900 - secondary backgrounds
+          tertiary: '#27272a',  // zinc-800 - cards/dividers
+        },
+        'border': {
+          DEFAULT: '#27272a',   // zinc-800 - default borders
+          light: '#3f3f46',     // zinc-700 - lighter borders
+        },
+        'text': {
+          DEFAULT: '#d4d4d8',   // zinc-300 - default text
+          'muted-light': '#a1a1aa', //zinc-400
+          muted: '#71717a',     // zinc-500 - muted text
+          subtle: '#52525b',    // zinc-600 - subtle text
+          placeholder: '#3f3f46', // zinc-700 - placeholder text
+        },
+
         // Primary UW Colors
         'uw-purple': {
           DEFAULT: '#4B2E83',

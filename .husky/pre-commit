@@ -1,0 +1,11 @@
+echo "Running pre-commit checks..."
+
+# Skip lint for now - cleanup needed
+# TODO: Re-enable after cleanup branch fixes all lint errors
+# npm run lint || exit 1
+
+# Run tests - these must pass
+echo "Running tests..."
+npm test || exit 1
+
+echo "All checks passed!"

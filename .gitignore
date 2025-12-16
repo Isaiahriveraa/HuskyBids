@@ -79,3 +79,5 @@ next-env.d.ts
 
 //CLAUDE
 claude.md 
+# Local Netlify folder
+.netlify

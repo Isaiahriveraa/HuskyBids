@@ -59,7 +59,6 @@ export default function LoginPage() {
                 socialButtonsVariant: 'iconButton',
               }
             }}
-            routing="hash"
             path="/login"
             afterSignInUrl={redirectUrl}
             signUpUrl="/sign-up"

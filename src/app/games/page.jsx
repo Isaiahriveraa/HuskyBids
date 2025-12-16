@@ -22,7 +22,6 @@ const fetcher = (url) => fetch(url).then(res => {
 
 export default function GamesPage() {
   const { user: userData, refreshUser, updateBiscuits } = useUserContext();
-
   const [sport, setSport] = useState('all');
   const [syncing, setSyncing] = useState(false);
   const [showPastGames, setShowPastGames] = useState(false);

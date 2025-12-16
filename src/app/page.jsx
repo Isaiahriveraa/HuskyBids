@@ -1,6 +1,8 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
+import { useEffect } from 'react';
 import Link from 'next/link';
 
 // Feature data
@@ -43,82 +45,60 @@ const steps = [
 
 export default function Home() {
   const { isSignedIn, isLoaded } = useUser();
+  const router = useRouter();
+  useEffect(() => {
+    if (!isLoaded) {
+      return;
+    }
+
+    if (isSignedIn) {
+      router.replace("/dashboard");
+    }
+  }, [isSignedIn, isLoaded]);
 
   return (
     <div className="min-h-screen bg-zinc-950 font-mono text-zinc-300">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-dotted border-zinc-800 bg-zinc-950/90 backdrop-blur-sm">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <span className="text-white font-semibold tracking-tight">HuskyBids</span>
-          <nav className="flex items-center gap-4">
-            {isLoaded && (
-              isSignedIn ? (
-                <Link
-                  href="/dashboard"
-                  className="text-sm text-zinc-400 hover:text-white transition-colors"
-                >
-                  Dashboard →
-                </Link>
-              ) : (
-                <>
-                  <Link
-                    href="/login"
-                    className="text-sm text-zinc-400 hover:text-white transition-colors"
-                  >
-                    Log In
-                  </Link>
-                  <Link
-                    href="/sign-up"
-                    className="text-sm bg-zinc-100 hover:bg-white text-zinc-950 px-4 py-2 transition-colors"
-                  >
-                    Sign Up
-                  </Link>
-                </>
-              )
-            )}
-          </nav>
+        <div className="max-w-5xl mx-auto px-6 py-4">
+          <h1 className="text-xs tracking-[0.3em] uppercase text-text-muted-light hover:text-text">
+            HUSKYBIDS
+          </h1>
         </div>
       </header>
 
       {/* Hero Section */}
       <section className="pt-32 pb-20 px-6">
         <div className="max-w-3xl mx-auto text-center space-y-6">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-600">
+          <p className="text-[16px] uppercase tracking-[0.2em] text-zinc-600">
             University of Washington
           </p>
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white">
-            HuskyBids
+            HUSKYBIDS
           </h1>
-          <p className="text-lg md:text-xl text-zinc-400 max-w-xl mx-auto">
+          <p className="text-lg md:text-xl text-text-subtle max-w-xl mx-auto">
             The premier virtual betting platform for UW Huskies sports.
-            Bet with biscuits, not money.
+            Bet with pts, not money.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            {isLoaded && (
-              isSignedIn ? (
-                <Link
-                  href="/dashboard"
-                  className="bg-zinc-100 hover:bg-white text-zinc-950 px-8 py-3 font-semibold transition-colors"
-                >
-                  Go to Dashboard
-                </Link>
-              ) : (
-                <>
-                  <Link
-                    href="/sign-up"
-                    className="bg-zinc-100 hover:bg-white text-zinc-950 px-8 py-3 font-semibold transition-colors"
-                  >
-                    Get Started
-                  </Link>
-                  <Link
-                    href="/login"
-                    className="border border-dotted border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-white px-8 py-3 font-semibold transition-colors"
-                  >
-                    Log In
-                  </Link>
-                </>
-              )
+            {isLoaded && !isSignedIn && (
+              <>
+              <Link
+                href="/sign-up"
+                className="bg-zinc-100 hover:bg-white text-zinc-950 px-8 py-3 font-semibold 
+                transition-colors"
+              >
+                Get Started
+              </Link>
+              <Link
+                href="/login"
+                className="border border-dotted border-zinc-700 hover:border-zinc-500 text-zinc-300 
+                hover:text-white px-8 py-3 font-semibold transition-colors"
+              >
+                Log In
+              </Link>
+              </> 
             )}
           </div>
         </div>
@@ -176,50 +156,11 @@ export default function Home() {
           </div>
         </div>
       </section>
-
+      
       {/* Dotted Divider */}
       <div className="max-w-5xl mx-auto px-6">
         <div className="border-t border-dotted border-zinc-800" />
       </div>
-
-      {/* Final CTA Section */}
-      <section className="py-20 px-6">
-        <div className="max-w-3xl mx-auto text-center space-y-6">
-          <h2 className="text-2xl md:text-3xl font-bold text-white">
-            Ready to start betting?
-          </h2>
-          <p className="text-zinc-400">
-            Join fellow Huskies fans and start with 1,000 free biscuits.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
-            {isLoaded && !isSignedIn && (
-              <>
-                <Link
-                  href="/sign-up"
-                  className="bg-zinc-100 hover:bg-white text-zinc-950 px-8 py-3 font-semibold transition-colors"
-                >
-                  Create Account
-                </Link>
-                <Link
-                  href="/login"
-                  className="border border-dotted border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-white px-8 py-3 font-semibold transition-colors"
-                >
-                  Sign In
-                </Link>
-              </>
-            )}
-            {isLoaded && isSignedIn && (
-              <Link
-                href="/games"
-                className="bg-zinc-100 hover:bg-white text-zinc-950 px-8 py-3 font-semibold transition-colors"
-              >
-                Browse Games
-              </Link>
-            )}
-          </div>
-        </div>
-      </section>
-
       {/* Footer */}
       <footer className="border-t border-dotted border-zinc-800 py-8 px-6">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-zinc-600">

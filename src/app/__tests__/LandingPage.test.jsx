@@ -20,9 +20,11 @@ jest.mock('@clerk/nextjs', () => ({
 
 // Mock Link since it's used in the component
 jest.mock('next/link', () => {
-  return ({ children, href }) => {
+  const MockLink = ({ children, href }) => {
     return <a href={href}>{children}</a>;
   };
+  MockLink.displayName = 'MockLink';
+  return MockLink;
 });
 
 describe('Landing Page (Home)', () => {
@@ -39,17 +41,20 @@ describe('Landing Page (Home)', () => {
 
     render(<Home />);
 
-    // Check for landing page content
-    expect(screen.getByText('HuskyBids')).toBeInTheDocument();
-    expect(screen.getByText('Sign Up')).toBeInTheDocument();
-    expect(screen.getByText('Log In')).toBeInTheDocument();
+    // Check for landing page content (text may appear multiple times)
+    expect(screen.getAllByText('HUSKYBIDS').length).toBeGreaterThan(0);
+    // Check for Get Started (sign up) and Log In links
+    const signUpLinks = screen.getAllByRole('link', { name: 'Get Started' });
+    expect(signUpLinks.length).toBeGreaterThan(0);
+    const loginLinks = screen.getAllByRole('link', { name: 'Log In' });
+    expect(loginLinks.length).toBeGreaterThan(0);
 
     // Crucial check: Ensure NO redirect happened
     expect(mockReplace).not.toHaveBeenCalled();
     expect(mockPush).not.toHaveBeenCalled();
   });
 
-  it('renders dashboard link for authenticated users', () => {
+  it('redirects authenticated users to dashboard', () => {
     // Simulate authenticated user
     mockUseUser.mockReturnValue({
       isSignedIn: true,
@@ -58,11 +63,8 @@ describe('Landing Page (Home)', () => {
 
     render(<Home />);
 
-    // Check for dashboard link
-    expect(screen.getByText('Go to Dashboard')).toBeInTheDocument();
-    
-    // Ensure "Sign Up" is NOT present
-    expect(screen.queryByText('Sign Up')).not.toBeInTheDocument();
+    // Crucial check: Authenticated users should be auto-redirected
+    expect(mockReplace).toHaveBeenCalledWith('/dashboard');
   });
 
   it('does not redirect while loading auth state', () => {
@@ -73,9 +75,9 @@ describe('Landing Page (Home)', () => {
 
     render(<Home />);
     
-    // Should still show the title/basic layout even while loading, 
+    // Should still show the title/basic layout even while loading,
     // or at least not redirect.
-    expect(screen.getByText('HuskyBids')).toBeInTheDocument();
+    expect(screen.getAllByText('HUSKYBIDS').length).toBeGreaterThan(0);
     expect(mockReplace).not.toHaveBeenCalled();
   });
 });

@@ -10,9 +10,9 @@ import {
   StatCard,
 } from '@/components/experimental';
 import { StatCardSkeleton } from '@/components/ui/LoadingSkeleton';
-import { useUserContext } from '../contexts/UserContext';
+import { useUserContext } from '@/app/contexts/UserContext';
 import { cn } from '@/shared/utils';
-import FireIcon from '@/components/FireIcon';
+import FireIcon from '@/components/icons/FireIcon';
 
 // SWR fetcher function
 const fetcher = (url) => fetch(url).then(res => {
@@ -86,7 +86,7 @@ export default function TasksPage() {
         <div className="border border-red-900/50 bg-red-900/10 p-6">
           <SectionLabel className="text-red-500">Error Loading Tasks</SectionLabel>
           <p className="text-zinc-500 text-sm mt-2 mb-4">
-            We couldn't load your daily tasks. Please try again later.
+            We could not load your daily tasks. Please try again later.
           </p>
           <button
             onClick={() => mutate()}

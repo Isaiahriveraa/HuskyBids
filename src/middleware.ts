@@ -43,8 +43,6 @@ export default authMiddleware({
       '/games',
       '/leaderboard',
       '/tasks',
-      '/change-password',
-      '/change-username',
     ];
 
     const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));

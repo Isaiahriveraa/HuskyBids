@@ -1,7 +1,5 @@
 'use client';
 
-import { User } from 'lucide-react';
-
 /**
  * Displays top player statistics
  * @param {Object} props

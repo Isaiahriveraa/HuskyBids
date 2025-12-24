@@ -19,7 +19,8 @@ let modelsRegistered = false;
  */
 export async function registerModels() {
   // Only register once per serverless function instance
-  if (modelsRegistered) {
+  // We also check mongoose.models to ensure they persist across hot reloads
+  if (modelsRegistered && mongoose.models.User && mongoose.models.Game && mongoose.models.Bet) {
     return;
   }
 

@@ -37,5 +37,5 @@ jobs:
           SKIP_ENV_VALIDATION: true
           # Provide dummy values for required env vars during build
           MONGODB_URI: mongodb://localhost:27017/test
-          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_dummy
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_Y2xlcmsuY29tJA
           CLERK_SECRET_KEY: sk_test_dummy

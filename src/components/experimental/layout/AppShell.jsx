@@ -15,7 +15,7 @@ import Sidebar from './Sidebar';
 import MobileNav from './MobileNav';
 import Header from './Header';
 import PageContainer from './PageContainer';
-import useKeyboardNav from '@/hooks/useKeyboardNav';
+import useKeyboardNav from '@/app/hooks/useKeyboardNav';
 
 export default function AppShell({ 
   children,

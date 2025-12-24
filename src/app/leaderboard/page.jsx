@@ -1,14 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useUserContext } from '../contexts/UserContext';
-import { useLeaderboard } from '../hooks/useAPI';
+import { useState } from 'react';
+import { useUserContext } from '@/app/contexts/UserContext';
+import { useLeaderboard } from '@/app/hooks/useAPI';
 import {
   SectionLabel,
   DottedDivider,
   LeaderboardRow,
   Kbd,
-  ActionBar,
 } from '@/components/experimental';
 import { LeaderboardSkeleton } from '@/components/ui/LoadingSkeleton';
 

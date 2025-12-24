@@ -1,5 +1,4 @@
 import User from '@server/models/User';
-import Game from '@server/models/Game';
 import Bet from '@server/models/Bet';
 import { calculateWinRate, calculateROI } from '@shared/utils/stats-utils';
 
@@ -217,19 +216,6 @@ class StatisticsService {
   async getUserRank(userId, sortBy = 'biscuits') {
     const user = await User.findOne({ clerkId: userId });
     if (!user) throw new Error('User not found');
-
-    // Determine sort order
-    let sortField;
-    switch (sortBy) {
-      case 'biscuits':
-        sortField = { biscuits: -1 };
-        break;
-      case 'totalBets':
-        sortField = { totalBets: -1, biscuits: -1 };
-        break;
-      default:
-        sortField = { biscuits: -1 };
-    }
 
     // Count how many users are ranked higher
     const query = {

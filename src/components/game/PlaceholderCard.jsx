@@ -8,7 +8,7 @@
  * @param {boolean} isUW - Whether this placeholder is for UW (affects styling)
  * @param {string} team - Team name for context ("UW" or opponent name)
  */
-export default function PlaceholderCard({ isUW = false, team = 'Team' }) {
+export default function PlaceholderCard({ isUW = false }) {
   // Match PlayerStatCard styling but with reduced opacity
   const bgClass = isUW
     ? 'bg-gradient-to-br from-uw-purple-100 to-uw-purple-50'

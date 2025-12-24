@@ -86,7 +86,6 @@ export default async function handler(req, res) {
 
         if (game) {
           // Update existing game
-          const wasCompleted = game.status === 'completed';
           const isNowCompleted = gameData.status === 'completed';
 
           // Update fields

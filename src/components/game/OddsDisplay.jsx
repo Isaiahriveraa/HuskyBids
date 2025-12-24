@@ -1,6 +1,6 @@
 'use client';
 
-import BiscuitIcon from '../BiscuitIcon';
+import BiscuitIcon from '../icons/BiscuitIcon';
 
 /**
  * Displays betting odds for both teams

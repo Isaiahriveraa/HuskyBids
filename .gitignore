@@ -81,3 +81,10 @@ next-env.d.ts
 claude.md 
 # Local Netlify folder
 .netlify
+
+.gemini/
+gha-creds-*.json
+
+# Gemini Agent Files
+.github/commands/
+.github/workflows/gemini-*.yml

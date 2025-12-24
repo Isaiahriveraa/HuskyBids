@@ -13,7 +13,6 @@
  */
 
 import connectDB from '@server/db';
-import Game from '@server/models/Game';
 import Bet from '@server/models/Bet';
 import User from '@server/models/User';
 import { getAuth } from '@clerk/nextjs/server';

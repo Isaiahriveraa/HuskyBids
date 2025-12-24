@@ -12,7 +12,7 @@ import {
 } from '@/components/experimental';
 import ErrorBoundary from '@components/ErrorBoundary';
 import { GameCardSkeleton } from '@/components/ui/LoadingSkeleton';
-import { useUserContext } from '../contexts/UserContext';
+import { useUserContext } from '@/app/contexts/UserContext';
 
 // SWR fetcher function
 const fetcher = (url) => fetch(url).then(res => {

@@ -59,28 +59,30 @@ const LoadingSpinner = ({
 };
 
 // Skeleton Loader Component
-LoadingSpinner.Skeleton = ({ 
+const Skeleton = ({
   width = 'w-full',
   height = 'h-4',
   rounded = 'rounded',
   className = '',
 }) => (
-  <div 
+  <div
     className={`
       animate-pulse bg-gray-200
       ${width} ${height} ${rounded} ${className}
     `}
   />
 );
+Skeleton.displayName = 'LoadingSpinner.Skeleton';
+LoadingSpinner.Skeleton = Skeleton;
 
 // Spinner with UW Logo (for brand consistency)
-LoadingSpinner.UWSpinner = ({ size = 'md' }) => {
+const UWSpinner = ({ size = 'md' }) => {
   const sizes = {
     sm: 'w-12 h-12',
     md: 'w-20 h-20',
     lg: 'w-32 h-32',
   };
-  
+
   return (
     <div className="flex items-center justify-center">
       <div className={`${sizes[size]} relative`}>
@@ -94,5 +96,7 @@ LoadingSpinner.UWSpinner = ({ size = 'md' }) => {
     </div>
   );
 };
+UWSpinner.displayName = 'LoadingSpinner.UWSpinner';
+LoadingSpinner.UWSpinner = UWSpinner;
 
 export default LoadingSpinner;

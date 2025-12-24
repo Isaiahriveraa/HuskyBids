@@ -14,7 +14,6 @@
 export default function PlayerStatCard({
   player,
   isUW = false,
-  opponentAbbrev = 'OPP'
 }) {
   if (!player) {
     return null;

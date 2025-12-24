@@ -3,8 +3,8 @@
 import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useUserContext } from '../contexts/UserContext';
-import { useUserStats } from '../hooks/useAPI';
+import { useUserContext } from '@/app/contexts/UserContext';
+import { useUserStats } from '@/app/hooks/useAPI';
 import {
   BalanceDisplay,
   DottedDivider,

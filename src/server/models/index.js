@@ -17,22 +17,22 @@ let modelsRegistered = false;
  * Register all Mongoose models
  * This function should be called after MongoDB connection is established
  */
-export function registerModels() {
+export async function registerModels() {
   // Only register once per serverless function instance
   if (modelsRegistered) {
     return;
   }
 
   try {
-    // Import models in dependency order
+    // Import models in dependency order using dynamic imports
     // User has no dependencies
-    require('./User');
+    await import('./User');
 
     // Game has no dependencies
-    require('./Game');
+    await import('./Game');
 
     // Bet depends on User and Game (via references)
-    require('./Bet');
+    await import('./Bet');
 
     modelsRegistered = true;
     console.log('✅ All Mongoose models registered successfully');

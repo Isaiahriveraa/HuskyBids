@@ -27,7 +27,7 @@ async function connectDB() {
     // IMPORTANT: Even with cached connection, ensure models are registered
     // This handles cases where the serverless function instance is reused
     // but models aren't in memory
-    registerModels();
+    await registerModels();
 
     return cached.conn;
   }
@@ -38,11 +38,11 @@ async function connectDB() {
     };
 
     console.log('🔌 Connecting to MongoDB...');
-    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+    cached.promise = mongoose.connect(MONGODB_URI, opts).then(async (mongoose) => {
       console.log('✅ MongoDB connected successfully');
 
       // Register all models immediately after connection
-      registerModels();
+      await registerModels();
 
       return mongoose;
     });

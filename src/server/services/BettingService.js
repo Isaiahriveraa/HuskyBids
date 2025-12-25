@@ -59,27 +59,15 @@ class BettingService {
         throw new Error(`Game is ${game.status} and not available for betting`);
       }
 
-      // Use startTime first, fall back to gameDate (align with client-side useBetValidation)
-      const gameTimeValue = game.startTime || game.gameDate;
-      const gameDateTime = new Date(gameTimeValue);
+      // Validation: Check if game has started
+      // Use a small buffer (e.g., 5 seconds) to account for slight server time differences
       const now = new Date();
-      
-      console.log('[BettingService] Date comparison debug:', {
-        gameId,
-        startTime: game.startTime,
-        gameDate: game.gameDate,
-        usedValue: gameTimeValue,
-        gameDateParsed: gameDateTime.toISOString(),
-        now: now.toISOString(),
-        gameTimestamp: gameDateTime.getTime(),
-        nowTimestamp: now.getTime(),
-        isGameInPast: gameDateTime < now,
-        differenceMs: gameDateTime.getTime() - now.getTime(),
-        differenceHours: ((gameDateTime.getTime() - now.getTime()) / (1000 * 60 * 60)).toFixed(2),
-      });
+      const gameTime = new Date(game.gameDate || game.startTime); // Handle both field names
+      const BUFFER_MS = 5000;
+      const cutoffTime = new Date(now.getTime() - BUFFER_MS);
 
-      if (gameDateTime < now) {
-        throw new Error(`Betting is closed - game has already started (gameDate: ${gameDateTime.toISOString()}, now: ${now.toISOString()})`);
+      if (gameTime <= cutoffTime) {
+        throw new Error(`Betting is closed - game has already started (gameDate: ${gameTime.toISOString()}, now: ${now.toISOString()})`);
       }
 
       // 5. Calculate current odds BEFORE placing bet
@@ -368,5 +356,5 @@ class BettingService {
   }
 }
 
-// Export singleton instance
-export default new BettingService();
+const bettingService = new BettingService();
+export default bettingService;

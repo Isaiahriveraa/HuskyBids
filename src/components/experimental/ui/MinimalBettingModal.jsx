@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useUserContext } from '@/app/contexts/UserContext';
 import { useBetValidation } from '@/app/hooks';
 import MinimalModal from './MinimalModal';
@@ -68,7 +68,7 @@ export default function MinimalBettingModal({ game, isOpen, onClose, onBetPlaced
   };
 
   // Handle bet placement
-  const handlePlaceBet = async () => {
+  const handlePlaceBet = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -136,7 +136,7 @@ export default function MinimalBettingModal({ game, isOpen, onClose, onBetPlaced
     } finally {
       setLoading(false);
     }
-  };
+  }, [betAmount, selectedTeam, userBiscuits, game, validate, refreshUser, onBetPlaced, onClose]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -181,7 +181,7 @@ export default function MinimalBettingModal({ game, isOpen, onClose, onBetPlaced
 
     document.addEventListener('keydown', handleKeyPress);
     return () => document.removeEventListener('keydown', handleKeyPress);
-  }, [isOpen, betAmount, selectedTeam, loading, userBiscuits]);
+  }, [isOpen, betAmount, selectedTeam, loading, userBiscuits, handlePlaceBet]);
 
   if (!game) return null;
 

@@ -1,6 +1,6 @@
-import Game from '../../models/Game';
+import Game from '@server/models/Game';
 import BettingService from './BettingService';
-import { calculateOdds } from '../odds-calculator';
+import { calculateOdds } from '@shared/utils/odds-calculator';
 
 /**
  * GameService
@@ -366,5 +366,5 @@ class GameService {
   }
 }
 
-// Export singleton instance
-export default new GameService();
+const gameService = new GameService();
+export default gameService;

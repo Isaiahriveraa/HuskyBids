@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import useSWR from 'swr';
 import { useUser } from '@clerk/nextjs';
 import {
@@ -39,7 +39,7 @@ export default function TasksPage() {
     revalidateOnFocus: false,
   });
 
-  const tasks = data?.tasks || [];
+  const tasks = useMemo(() => data?.tasks || [], [data?.tasks]);
   const summary = data?.summary || null;
   const streak = data?.streak || null;
   const loading = isLoading || !isLoaded;

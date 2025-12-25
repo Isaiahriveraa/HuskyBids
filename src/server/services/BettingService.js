@@ -62,7 +62,7 @@ class BettingService {
       // Validation: Check if game has started
       // Use a small buffer (e.g., 5 seconds) to account for slight server time differences
       const now = new Date();
-      const gameTime = new Date(game.gameDate || game.startTime); // Handle both field names
+      const gameTime = new Date(game.gameDate);
       const BUFFER_MS = 5000;
       const cutoffTime = new Date(now.getTime() - BUFFER_MS);
 

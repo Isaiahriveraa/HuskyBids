@@ -75,7 +75,7 @@ export function LoadingProvider({ children }) {
         clearTimeoutRef.current = null;
       }
     }
-  }, [pathname, isLoading]);
+  }, [pathname]);
 
   // Cleanup on unmount
   useEffect(() => {

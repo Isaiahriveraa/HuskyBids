@@ -7,7 +7,7 @@ describe('useBetValidation', () => {
   const createScheduledGame = (overrides = {}) => ({
     _id: 'game-123',
     status: GAME_STATUSES.SCHEDULED,
-    startTime: new Date(Date.now() + 86400000).toISOString(), // Tomorrow
+    gameDate: new Date(Date.now() + 86400000).toISOString(), // Tomorrow
     homeTeam: 'Washington Huskies',
     awayTeam: 'Oregon Ducks',
     homeOdds: 1.8,
@@ -68,19 +68,6 @@ describe('useBetValidation', () => {
     it('should return canBet: false when game has already started', () => {
       const { result } = renderHook(() => useBetValidation());
       const game = createScheduledGame({
-        startTime: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
-      });
-
-      const check = result.current.canBet(game);
-
-      expect(check.canBet).toBe(false);
-      expect(check.reason).toBe(BETTING_ERRORS.GAME_ALREADY_STARTED);
-    });
-
-    it('should use gameDate if startTime is not available', () => {
-      const { result } = renderHook(() => useBetValidation());
-      const game = createScheduledGame({
-        startTime: undefined,
         gameDate: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
       });
 
@@ -90,10 +77,9 @@ describe('useBetValidation', () => {
       expect(check.reason).toBe(BETTING_ERRORS.GAME_ALREADY_STARTED);
     });
 
-    it('should return canBet: true when startTime and gameDate are both undefined', () => {
+    it('should return canBet: true when gameDate is undefined', () => {
       const { result } = renderHook(() => useBetValidation());
       const game = createScheduledGame({
-        startTime: undefined,
         gameDate: undefined,
       });
 
@@ -104,10 +90,10 @@ describe('useBetValidation', () => {
       expect(check.reason).toBeNull();
     });
 
-    it('should return canBet: true when startTime is invalid date string', () => {
+    it('should return canBet: true when gameDate is invalid date string', () => {
       const { result } = renderHook(() => useBetValidation());
       const game = createScheduledGame({
-        startTime: 'invalid-date',
+        gameDate: 'invalid-date',
       });
 
       const check = result.current.canBet(game);
@@ -263,7 +249,7 @@ describe('useBetValidation', () => {
       const validation = result.current.validate({
         ...defaultParams(),
         game: createScheduledGame({
-          startTime: new Date(Date.now() - 3600000).toISOString(),
+          gameDate: new Date(Date.now() - 3600000).toISOString(),
         }),
       });
 

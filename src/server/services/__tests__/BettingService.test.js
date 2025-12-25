@@ -215,12 +215,12 @@ describe('BettingService', () => {
       expect(mockSession.abortTransaction).toHaveBeenCalled();
     });
 
-    it('should throw error if game has already started (time check)', async () => {
+    it('should throw error if game has already started (outside buffer)', async () => {
       User.findOne.mockReturnValue(mockFindOneSession(mockUser));
       const pastGame = { 
         ...mockGame, 
-        startTime: new Date(Date.now() - 1000), // Started 1s ago
-        gameDate: new Date(Date.now() - 1000) 
+        startTime: new Date(Date.now() - 6000), // Started 6s ago (outside 5s buffer)
+        gameDate: new Date(Date.now() - 6000) 
       };
       Game.findById.mockReturnValue(mockFindByIdSession(pastGame));
 
@@ -228,6 +228,22 @@ describe('BettingService', () => {
         .rejects.toThrow(/Betting is closed - game has already started/);
 
       expect(mockSession.abortTransaction).toHaveBeenCalled();
+    });
+
+    it('should allow bet if game started recently (within 5s buffer)', async () => {
+      User.findOne.mockReturnValue(mockFindOneSession(mockUser));
+      const bufferGame = {
+        ...mockGame,
+        startTime: new Date(Date.now() - 2000), // Started 2s ago (inside 5s buffer)
+        gameDate: new Date(Date.now() - 2000)
+      };
+      Game.findById.mockReturnValue(mockFindByIdSession(bufferGame));
+
+      // Should not throw
+      const result = await BettingService.placeBet(validBetParams);
+
+      expect(result).toHaveProperty('bet');
+      expect(mockSession.commitTransaction).toHaveBeenCalled();
     });
 
     it('should calculate correct odds based on team selection', async () => {

@@ -59,15 +59,16 @@ class BettingService {
         throw new Error(`Game is ${game.status} and not available for betting`);
       }
 
-    // Validation: Check if game has started
-    // Use a small buffer (e.g., 5 seconds) to account for slight server time differences
-    // But be strict - if game has started, no bets.
-    const now = new Date();
-    const gameTime = new Date(game.gameDate || game.startTime); // Handle both field names
-    
-    if (gameTime <= now) {
-      throw new Error(`Betting is closed - game has already started (gameDate: ${gameTime.toISOString()}, now: ${now.toISOString()})`);
-    }
+      // Validation: Check if game has started
+      // Use a small buffer (e.g., 5 seconds) to account for slight server time differences
+      const now = new Date();
+      const gameTime = new Date(game.gameDate || game.startTime); // Handle both field names
+      const BUFFER_MS = 5000;
+      const cutoffTime = new Date(now.getTime() - BUFFER_MS);
+
+      if (gameTime <= cutoffTime) {
+        throw new Error(`Betting is closed - game has already started (gameDate: ${gameTime.toISOString()}, now: ${now.toISOString()})`);
+      }
 
       // 5. Calculate current odds BEFORE placing bet
       const currentOdds = calculateOdds(

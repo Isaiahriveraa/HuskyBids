@@ -13,7 +13,7 @@ import { cn } from '@/shared/utils';
 export default function HuskyBidsLoader({
   size = 'md',
   centered = false,
-  subtitle = null,  // TODO: New prop added - defaults to null
+  subtitle = null,
   className
 }) {
   const text = 'HuskyBids';

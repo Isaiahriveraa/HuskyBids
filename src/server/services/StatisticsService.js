@@ -311,5 +311,5 @@ class StatisticsService {
   }
 }
 
-// Export singleton instance
-export default new StatisticsService();
+const statisticsService = new StatisticsService();
+export default statisticsService;

@@ -49,6 +49,11 @@ const customJestConfig = {
   transform: {
     '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }],
   },
+  
+  // Transform node_modules that are ESM
+  transformIgnorePatterns: [
+    'node_modules/(?!(bson|mongoose|mongodb)/)',
+  ],
 };
 
 module.exports = createJestConfig(customJestConfig);

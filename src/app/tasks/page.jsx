@@ -39,7 +39,7 @@ export default function TasksPage() {
     revalidateOnFocus: false,
   });
 
-  const tasks = data?.tasks || [];
+  const tasks = useMemo(() => data?.tasks || [], [data?.tasks]);
   const summary = data?.summary || null;
   const streak = data?.streak || null;
   const loading = isLoading || !isLoaded;

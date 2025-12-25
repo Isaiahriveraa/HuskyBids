@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 /**
  * Custom hook for fetching and managing games data
@@ -12,11 +12,7 @@ export function useGames({ sport = 'football', status = 'upcoming' } = {}) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchGames();
-  }, [sport, status]);
-
-  const fetchGames = async () => {
+  const fetchGames = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -39,7 +35,11 @@ export function useGames({ sport = 'football', status = 'upcoming' } = {}) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [sport, status]);
+
+  useEffect(() => {
+    fetchGames();
+  }, [fetchGames]);
 
   return { games, loading, error, refetch: fetchGames };
 }

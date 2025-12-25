@@ -54,7 +54,7 @@ export default function Home() {
     if (isSignedIn) {
       router.replace("/dashboard");
     }
-  }, [isSignedIn, isLoaded]);
+  }, [isSignedIn, isLoaded, router]);
 
   return (
     <div className="min-h-screen bg-zinc-950 font-mono text-zinc-300">

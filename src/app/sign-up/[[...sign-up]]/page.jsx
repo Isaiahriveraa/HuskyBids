@@ -1,8 +1,10 @@
 'use client';
 
-import { SignUp } from '@clerk/nextjs';
+import { SignUp, ClerkLoading, ClerkLoaded } from '@clerk/nextjs';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
+import { HuskyBidsLoader } from '@/components/experimental';
+import { minimalClerkAppearance } from '@/shared/utils/clerk-appearance';
 
 /**
  * Sign Up Page Content
@@ -14,54 +16,36 @@ function SignUpContent() {
 
   return (
     <div className="w-full max-w-md space-y-8">
-      {/* Minimal header */}
-      <header className="text-center mb-8">
-        <h1 className="text-sm tracking-[0.3em] uppercase text-zinc-400 mb-2">
-          HuskyBids
-        </h1>
-        <p className="text-xs text-zinc-600">
-          Create your account
-        </p>
-      </header>
-
-      {/* Clerk SignUp Component with minimal styling */}
-      <div>
-        <SignUp
-          appearance={{
-            variables: {
-              colorPrimary: '#71717a',
-              colorText: '#d4d4d8',
-              colorTextSecondary: '#71717a',
-              colorBackground: '#18181b',
-              colorInputBackground: '#27272a',
-              colorInputText: '#d4d4d8',
-              fontFamily: 'ui-monospace, monospace',
-              fontSize: '14px',
-              borderRadius: '0px',
-            },
-            elements: {
-              rootBox: 'mx-auto',
-              card: 'bg-zinc-900 border border-dotted border-zinc-800 shadow-none',
-              headerTitle: 'text-zinc-300 text-sm font-mono',
-              headerSubtitle: 'text-zinc-600 text-xs font-mono',
-              formFieldInput: 'bg-zinc-800 border border-dotted border-zinc-700 text-zinc-300 font-mono text-sm focus:border-zinc-500 rounded-none',
-              formFieldLabel: 'text-zinc-500 text-xs font-mono uppercase tracking-wider',
-              formButtonPrimary: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-dotted border-zinc-700 font-mono text-sm shadow-none rounded-none',
-              footerActionLink: 'text-zinc-500 hover:text-zinc-400 font-mono text-xs',
-              socialButtonsBlockButton: 'border border-dotted border-zinc-700 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 font-mono text-sm rounded-none shadow-none',
-              dividerLine: 'bg-zinc-800',
-              dividerText: 'text-zinc-600 font-mono text-xs',
-            },
-            layout: {
-              socialButtonsPlacement: 'bottom',
-              socialButtonsVariant: 'iconButton',
-            }
-          }}
-          path="/sign-up"
-          signInUrl="/login"
-          afterSignUpUrl={redirectUrl}
+      {/* Loading state while Clerk initializes */}
+      <ClerkLoading>
+        <HuskyBidsLoader
+          centered
+          subtitle="Creating your account..."
         />
-      </div>
+      </ClerkLoading>
+
+      {/* Content shown when Clerk is ready */}
+      <ClerkLoaded>
+        {/* Minimal header */}
+        <header className="text-center mb-8">
+          <h1 className="text-sm tracking-[0.3em] uppercase text-zinc-400 mb-2">
+            HuskyBids
+          </h1>
+          <p className="text-xs text-zinc-600">
+            Create your account
+          </p>
+        </header>
+
+        {/* Clerk SignUp Component with minimal styling */}
+        <div>
+          <SignUp
+            appearance={minimalClerkAppearance}
+            path="/sign-up"
+            signInUrl="/login"
+            afterSignUpUrl={redirectUrl}
+          />
+        </div>
+      </ClerkLoaded>
     </div>
   );
 }

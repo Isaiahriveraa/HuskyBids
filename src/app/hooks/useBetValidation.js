@@ -28,8 +28,8 @@ export function useBetValidation() {
   /**
    * Check if a game is available for betting.
    * Use this for proactive UI disabling (disable bet button before user attempts).
-   * 
-   * @param {Object} game - Game object with status and startTime
+   *
+   * @param {Object} game - Game object with status and gameDate
    * @returns {{ canBet: boolean, reason: string | null }}
    */
   const canBet = useCallback((game) => {
@@ -47,20 +47,17 @@ export function useBetValidation() {
       return { canBet: false, reason: BETTING_ERRORS.GAME_NOT_SCHEDULED };
     }
 
-    // Check if game has already started (startTime or gameDate in the past)
+    // Check if game has already started (gameDate in the past)
     // Only perform check if we have a valid time value
-    const gameTimeValue = game.startTime || game.gameDate;
-    if (gameTimeValue) {
-      const gameTime = new Date(gameTimeValue);
+    if (game.gameDate) {
+      const gameTime = new Date(game.gameDate);
       const now = new Date();
 
       if (DEBUG) {
         const isValidDate = !isNaN(gameTime.getTime());
         console.log('[useBetValidation] canBet: Date comparison debug', {
           gameId: game._id,
-          startTime: game.startTime,
           gameDate: game.gameDate,
-          usedValue: gameTimeValue,
           gameTimeParsed: isValidDate ? gameTime.toISOString() : 'Invalid Date',
           now: now.toISOString(),
           isValidDate,
@@ -78,7 +75,7 @@ export function useBetValidation() {
         return { canBet: false, reason: BETTING_ERRORS.GAME_ALREADY_STARTED };
       }
     } else {
-      if (DEBUG) console.log('[useBetValidation] canBet: no startTime or gameDate available, allowing bet');
+      if (DEBUG) console.log('[useBetValidation] canBet: no gameDate available, allowing bet');
     }
 
     if (DEBUG) console.log('[useBetValidation] canBet: all checks passed, betting allowed');

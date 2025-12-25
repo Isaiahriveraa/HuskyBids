@@ -39,6 +39,7 @@ export default function TasksPage() {
     revalidateOnFocus: false,
   });
 
+  // Memoize to prevent useEffect from running on every render due to new array reference
   const tasks = useMemo(() => data?.tasks || [], [data?.tasks]);
   const summary = data?.summary || null;
   const streak = data?.streak || null;

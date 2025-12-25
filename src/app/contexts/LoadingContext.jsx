@@ -66,16 +66,14 @@ export function LoadingProvider({ children }) {
   // Clear loading state directly on route changes
   useEffect(() => {
     // When pathname changes, clear any loading state immediately
-    if (isLoading) {
-      setIsLoading(false);
-      setMessage('');
-      loadingStartTimeRef.current = null;
-      if (clearTimeoutRef.current) {
-        clearTimeout(clearTimeoutRef.current);
-        clearTimeoutRef.current = null;
-      }
+    setIsLoading(false);
+    setMessage('');
+    loadingStartTimeRef.current = null;
+    if (clearTimeoutRef.current) {
+      clearTimeout(clearTimeoutRef.current);
+      clearTimeoutRef.current = null;
     }
-  }, [pathname, isLoading]);
+  }, [pathname]);
 
   // Cleanup on unmount
   useEffect(() => {

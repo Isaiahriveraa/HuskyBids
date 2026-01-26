@@ -276,14 +276,14 @@ export default function GamesPage() {
 
       {/* Games Grid */}
       {loading && games.length === 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3">
           {[...Array(6)].map((_, i) => (
             <GameCardSkeleton key={i} />
           ))}
         </div>
       ) : !loading && games.length > 0 ? (
         <div className="max-h-[calc(100vh-20rem)] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3">
             {games.map((game) => (
               <ErrorBoundary key={game._id}>
                 <MinimalGameCard

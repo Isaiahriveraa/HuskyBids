@@ -28,7 +28,7 @@ export default function Header({
 
       {/* Desktop Header */}
       <header className="hidden lg:block sticky top-0 z-40 bg-zinc-950/90 backdrop-blur-sm border-b border-dotted border-zinc-800">
-        <div className="max-w-2xl mx-auto px-8 py-4 flex items-center justify-between">
+        <div className="max-w-2xl xl:max-w-5xl 2xl:max-w-7xl mx-auto px-8 xl:px-10 2xl:px-12 py-4 flex items-center justify-between">
           {showSearch && (
             <div className="flex items-center gap-4 text-xs text-zinc-600">
               <span>

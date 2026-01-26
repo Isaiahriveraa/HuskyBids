@@ -17,7 +17,7 @@ export default function PageContainer({
   return (
     <main 
       className={cn(
-        'max-w-lg lg:max-w-2xl mx-auto px-6 lg:px-8 pb-24 lg:pb-12',
+        'max-w-lg lg:max-w-2xl xl:max-w-5xl 2xl:max-w-7xl mx-auto px-6 lg:px-8 xl:px-10 2xl:px-12 pb-24 lg:pb-12',
         className
       )}
       {...props}

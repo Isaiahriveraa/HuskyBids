@@ -8,6 +8,8 @@ jest.mock('@clerk/nextjs', () => ({
   SignUp: (props) => {
     return <div data-testid="clerk-signup" data-props={JSON.stringify(props)}>SignUp Component</div>;
   },
+  ClerkLoading: ({ children }) => <div data-testid="clerk-loading">{children}</div>,
+  ClerkLoaded: ({ children }) => <div data-testid="clerk-loaded">{children}</div>,
 }));
 
 // Mock useSearchParams

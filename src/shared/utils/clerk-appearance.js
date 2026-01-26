@@ -12,15 +12,15 @@
 
 export const minimalClerkAppearance = {
   variables: {
-    colorPrimary: '#a1a1aa',        // zinc-400
+    colorPrimary: '#71717a',        // zinc-500 (matches login/signup inline config)
     colorText: '#d4d4d8',           // zinc-300
     colorTextSecondary: '#71717a',  // zinc-500
     colorBackground: '#18181b',      // zinc-900
     colorInputBackground: '#27272a', // zinc-800
     colorInputText: '#d4d4d8',      // zinc-300
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-    fontSize: '0.875rem',            // 14px
-    borderRadius: '0',               // No rounded corners
+    fontFamily: 'ui-monospace, monospace',
+    fontSize: '14px',
+    borderRadius: '0px',
   },
   elements: {
     rootBox: 'mx-auto',
@@ -99,6 +99,6 @@ export const minimalClerkAppearance = {
   },
   layout: {
     socialButtonsPlacement: 'bottom',
-    socialButtonsVariant: 'blockButton',
+    socialButtonsVariant: 'iconButton',  // Icon buttons (not block) to match original
   }
 };

@@ -102,6 +102,7 @@ describe('BettingService', () => {
       _id: 'game123',
       status: 'scheduled',
       startTime: new Date(Date.now() + 86400000), // Tomorrow
+      gameDate: new Date(Date.now() + 86400000), // Synced with startTime
       homeBets: 0,
       awayBets: 0,
       homeBiscuitsWagered: 0,

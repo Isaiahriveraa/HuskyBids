@@ -23,6 +23,8 @@ jest.mock('@clerk/nextjs', () => ({
     mockSignIn(props);
     return <div data-testid="clerk-signin">SignIn Component</div>;
   },
+  ClerkLoading: ({ children }) => <div data-testid="clerk-loading">{children}</div>,
+  ClerkLoaded: ({ children }) => <div data-testid="clerk-loaded">{children}</div>,
 }));
 
 // Mock next/navigation
